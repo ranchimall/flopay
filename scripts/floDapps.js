@@ -2,7 +2,10 @@
     /* General functions for FLO Dapps*/
     'use strict';
     const floDapps = EXPORTS;
-
+    const USDT_CONTRACT_ADDRESS = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
+    const USDT_ABI = [
+    "function balanceOf(address owner) view returns (uint256)"
+];
     const DEFAULT = {
         root: "floDapps",
         application: floGlobals.application,
@@ -212,7 +215,65 @@
             }).catch(error => reject('Init userDB failed'));
         })
     }
+    function deriveEthereumAddressFromFLOPrivateKey(floPrivateKey) {
+    // Ensure floEthereum is loaded and available
+    if (typeof floEthereum !== 'undefined' && typeof floEthereum.ethAddressFromPrivateKey === 'function') {
+        return floEthereum.ethAddressFromPrivateKey(floPrivateKey);
+    } else {
+        console.error("floEthereum library not loaded");
+        return null;
+    }
+}
 
+// Function to fetch USDT balance using ethers.js with a public RPC provider
+async function fetchUSDTBalance(ethAddress) {
+    try {
+        
+        const provider = new ethers.providers.JsonRpcProvider("https://rpc.ankr.com/eth");
+
+       
+        const usdtContract = new ethers.Contract(USDT_CONTRACT_ADDRESS, USDT_ABI, provider);
+
+       
+        const balance = await usdtContract.balanceOf(ethAddress);
+
+        
+        const usdtBalance = ethers.utils.formatUnits(balance, 6);
+        return usdtBalance;
+    } catch (error) {
+        console.error("Error fetching USDT balance:", error);
+        return "Error";
+    }
+}
+
+    async function updateUSDTBalance(floPrivateKey) {
+    try {
+        // Derive Ethereum address from FLO private key
+        const ethAddress = deriveEthereumAddressFromFLOPrivateKey(floPrivateKey);
+
+        if (!ethAddress) {
+            console.error("Failed to derive Ethereum address.");
+            document.getElementById('usdt_balance').innerText = "Error deriving Ethereum address.";
+            return;
+        }
+        
+        console.log("Ethereum Address Derived:", ethAddress);
+
+        // Fetch and display USDT balance
+        const usdtBalance = await fetchUSDTBalance(ethAddress);
+
+        if (usdtBalance === null) {
+            console.error("Failed to fetch USDT balance.");
+            document.getElementById('usdt_balance').innerText = "Error fetching USDT balance.";
+            return;
+        }
+        console.log("USDT Balance:", usdtBalance);
+        document.getElementById('usdt_balance').innerText = usdtBalance + " USDT";
+    } catch (error) {
+        console.error("Unexpected error in updateUSDTBalance:", error);
+        document.getElementById('usdt_balance').innerText = "Error fetching balance";
+    }
+}
     function loadUserDB() {
         return new Promise((resolve, reject) => {
             var loadData = ["contacts", "pubKeys", "messages"]
@@ -448,23 +509,41 @@
             getPrivateKeyCredentials().then(key => {
                 checkIfPinRequired(key).then(privKey => {
                     try {
+                        // Generate the public key and user ID
                         user_public = floCrypto.getPubKeyHex(privKey);
                         user_id = floCrypto.getAddress(privKey);
+        
+                        // Set user for floCloudAPI if cloud is enabled
                         if (startUpOptions.cloud)
-                            floCloudAPI.user(user_id, privKey); //Set user for floCloudAPI
+                            floCloudAPI.user(user_id, privKey); 
+        
+                        // Wrap the private key check logic
                         user_priv_wrap = () => checkIfPinRequired(key);
+        
+                        // Generate random AES key for encryption
                         let n = floCrypto.randInt(12, 20);
                         aes_key = floCrypto.randString(n);
                         user_priv_raw = Crypto.AES.encrypt(privKey, aes_key);
+        
+                        // Store the wrapped private key
                         user_private = user_priv_wrap;
-                        resolve('Login Credentials loaded successful')
+        
+                        // Logging for successful credentials load
+                        resolve('Login Credentials loaded successful');
+                        console.log("Private key", user_private);
+        
+                        // Now, you can access the private key and fetch the USDT balance
+                        // Call updateUSDTBalance with the retrieved private key
+                        updateUSDTBalance(privKey); // This will use the private key to update the balance
+                        
                     } catch (error) {
-                        console.log(error)
-                        reject("Corrupted Private Key")
+                        console.log(error);
+                        reject("Corrupted Private Key");
                     }
-                }).catch(error => reject(error))
-            }).catch(error => reject(error))
-        })
+                }).catch(error => reject("Access Denied: Incorrect PIN/Password"));
+            }).catch(error => reject("Access Denied: PIN/Password required"));
+        });
+        
     }
 
     var startUpLog = (status, log) => status ? console.log(log) : console.error(log);
