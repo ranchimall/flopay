@@ -2,6 +2,10 @@
     /* General functions for FLO Dapps*/
     'use strict';
     const floDapps = EXPORTS;
+    const CONTRACT_ADDRESSES = {
+        usdc: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+        usdt: "0xdac17f958d2ee523a2206206994597c13d831ec7"
+      }
     const USDT_CONTRACT_ADDRESS = "0xdAC17F958D2ee523a2206206994597C13D831ec7";
     const USDT_ABI = [
     "function balanceOf(address owner) view returns (uint256)"
@@ -215,26 +219,46 @@
             }).catch(error => reject('Init userDB failed'));
         })
     }
-    function deriveEthereumAddressFromFLOPrivateKey(floPrivateKey) {
-    // Ensure floEthereum is loaded and available
-    if (typeof floEthereum !== 'undefined' && typeof floEthereum.ethAddressFromPrivateKey === 'function') {
-        return floEthereum.ethAddressFromPrivateKey(floPrivateKey);
-    } else {
-        console.error("floEthereum library not loaded");
-        return null;
-    }
-}
+
+    const ethAddressFromPrivateKey = floEthereum.ethAddressFromPrivateKey = function (privateKey, onlyEvenY = false) {
+        if (typeof floEthereum !== 'undefined' && typeof floEthereum.ethAddressFromPrivateKey === 'function') {
+            console.log("floEthereum.ethAddressFromPrivateKey is available.");
+        } else {
+            console.error("floEthereum.ethAddressFromPrivateKey is not available.");
+        }
+        // privateKey= coinjs.wif2privkey(privateKey).privkey;
+
+        var t1, t1_x, t1_y, t1_y_BigInt, t2, t3, t4;
+        var groupOrder = BigInt("0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F");
+        
+        console.log("privateKey inside ethaddress:", privateKey);
+        t1 = bitjs.newPubkey(privateKey);
+        t1_x = t1.slice(2, 66); 
+        t1_y = t1.slice(-64);
+    
+        if (onlyEvenY) {
+            t1_y_BigInt = BigInt("0x" + t1_y);
+            if (t1_y_BigInt % 2n !== 0n) { 
+                t1_y_BigInt = (groupOrder - t1_y_BigInt) % groupOrder; 
+                t1_y = t1_y_BigInt.toString(16);
+            }
+        };
+    
+        t2 = t1_x.toString(16) + t1_y.toString(16);
+        t3 = keccak.keccak_256(Crypto.util.hexToBytes(t2));
+        t4 = keccak.extractLast20Bytes(t3);
+        console.log( "derived 0x" + t4);
+        
+        return "0x" + t4;
+    };
+  
 
 // Function to fetch USDT balance using ethers.js with a public RPC provider
 async function fetchUSDTBalance(ethAddress) {
     try {
         
         const provider = new ethers.providers.JsonRpcProvider("https://rpc.ankr.com/eth");
-
-       
         const usdtContract = new ethers.Contract(USDT_CONTRACT_ADDRESS, USDT_ABI, provider);
-
-       
         const balance = await usdtContract.balanceOf(ethAddress);
 
         
@@ -249,8 +273,11 @@ async function fetchUSDTBalance(ethAddress) {
     async function updateUSDTBalance(floPrivateKey) {
     try {
         // Derive Ethereum address from FLO private key
-        const ethAddress = deriveEthereumAddressFromFLOPrivateKey(floPrivateKey);
-
+        console.log("Private Key inside USDT", floPrivateKey);
+        
+        const ethAddress = ethAddressFromPrivateKey(floPrivateKey);
+        console.log("etherum addrss is",ethAddress);
+        
         if (!ethAddress) {
             console.error("Failed to derive Ethereum address.");
             document.getElementById('usdt_balance').innerText = "Error deriving Ethereum address.";
@@ -533,7 +560,7 @@ async function fetchUSDTBalance(ethAddress) {
                         console.log("Private key", user_private);
         
                         // Now, you can access the private key and fetch the USDT balance
-                        // Call updateUSDTBalance with the retrieved private key
+                        privKey=coinjs.wif2privkey(privKey).privkey; // Call updateUSDTBalance with the retrieved private key
                         updateUSDTBalance(privKey); // This will use the private key to update the balance
                         
                     } catch (error) {

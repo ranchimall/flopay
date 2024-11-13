@@ -14,6 +14,8 @@ var hashmini = {};
 (function () {
     base.bytes = base.stringToBytes = base.str = base.bytesToString = base.hex = base.utf8 = base.bech32m = base.bech32 = base.base58check = base.base58xmr = base.base58xrp = base.base58flickr = base.base58 = base.base64url = base.base64 = base.base32crockford = base.base32hex = base.base32 = base.base16 = base.utils = base.assertNumber = void 0;
     // Utilities
+    
+    
     function assertNumber(n) {
         if (!Number.isSafeInteger(n))
             throw new Error("Wrong integer: ".concat(n));
@@ -38,6 +40,8 @@ var hashmini = {};
     function alphabet(alphabet) {
         return {
             encode: function (digits) {
+                console.log("encode digits", digits);
+                
                 if (!Array.isArray(digits) || (digits.length && typeof digits[0] !== 'number'))
                     throw new Error('alphabet.encode input should be an array of numbers');
                 return digits.map(function (i) {
