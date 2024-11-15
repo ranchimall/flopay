@@ -236,35 +236,35 @@
         "type": "event"
       }
     ]
-    const CONTRACT_ADDRESSES = {
-      usdc: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
-      usdt: "0xdac17f958d2ee523a2206206994597c13d831ec7"
-    }
-    function getProvider() {
-      // switches provider based on whether the user is using MetaMask or not
-      if (window.ethereum) {
-        return new ethers.providers.Web3Provider(window.ethereum);
-      } else {
-        return new ethers.providers.JsonRpcProvider(`https://mainnet.infura.io/v3/6e12fee52bdd48208f0d82fb345bcb3c`)
-      }
-    }
-    function connectToMetaMask() {
-      return new Promise((resolve, reject) => {
-        // if (typeof window.ethereum === "undefined")
-        //   return reject("MetaMask not installed");
-        return resolve(true)
-        ethereum
-          .request({ method: 'eth_requestAccounts' })
-          .then((accounts) => {
-            console.log('Connected to MetaMask')
-            return resolve(accounts)
-          })
-          .catch((err) => {
-            console.log(err)
-            return reject(err)
-          })
-      })
-    }
+    // const CONTRACT_ADDRESSES = {
+    //   usdc: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48",
+    //   usdt: "0xdac17f958d2ee523a2206206994597c13d831ec7"
+    // }
+    // function getProvider() {
+    //   // switches provider based on whether the user is using MetaMask or not
+    //   if (window.ethereum) {
+    //     return new ethers.providers.Web3Provider(window.ethereum);
+    //   } else {
+    //     return new ethers.providers.JsonRpcProvider(`https://mainnet.infura.io/v3/6e12fee52bdd48208f0d82fb345bcb3c`)
+    //   }
+    // }
+    // function connectToMetaMask() {
+    //   return new Promise((resolve, reject) => {
+    //     // if (typeof window.ethereum === "undefined")
+    //     //   return reject("MetaMask not installed");
+    //     return resolve(true)
+    //     ethereum
+    //       .request({ method: 'eth_requestAccounts' })
+    //       .then((accounts) => {
+    //         console.log('Connected to MetaMask')
+    //         return resolve(accounts)
+    //       })
+    //       .catch((err) => {
+    //         console.log(err)
+    //         return reject(err)
+    //       })
+    //   })
+    // }
     // connectToMetaMask();
     const getBalance = ethOperator.getBalance = async (address) => {
       try {
