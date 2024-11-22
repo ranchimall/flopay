@@ -280,7 +280,7 @@
         }
     }
 
-    //Check if the given address (any blockchain) is valid or not
+    // if the given address (any blockchain) is valid or not
     floCrypto.validateAddr = function (address, std = true, bech = true) {
         let raw = decodeAddress(address);
         if (!raw)
@@ -302,7 +302,50 @@
         } else //unknown
             return false;
     }
-
+    
+    // Ethereum address validation
+    floCrypto.validateEthAddr = function (address, checksum = true) {
+        // Basic validation: Check if the address is 42 characters and starts with '0x'
+        if (typeof address !== 'string' || address.length !== 42 || !address.startsWith('0x')) {
+            return false;
+        }
+    
+        // Validate hexadecimal characters
+        const hexRegex = /^0x[a-fA-F0-9]{40}$/;
+        if (!hexRegex.test(address)) {
+            return false;
+        }
+    
+        // Checksum validation
+        if (checksum) {
+            return floCrypto.validateChecksum(address);
+        }
+    
+        return true; // Passes basic checks
+    };
+    
+    // Function to validate EIP-55 checksum
+    floCrypto.validateChecksum = function (address) {
+        const addressWithoutPrefix = address.slice(2).toLowerCase(); // Remove '0x' and make it lowercase
+        const keccakHash = keccak256(addressWithoutPrefix); // Compute Keccak-256 hash
+        for (let i = 0; i < 40; i++) {
+            const hashChar = parseInt(keccakHash[i], 16); // Convert hash character to an integer
+            const addressChar = addressWithoutPrefix[i];
+            if ((hashChar > 7 && addressChar.toUpperCase() !== addressChar) ||
+                (hashChar <= 7 && addressChar.toLowerCase() !== addressChar)) {
+                return false; // Invalid checksum
+            }
+        }
+        return true;
+    };
+    
+    // Helper function for Keccak-256 hashing
+    function keccak256(data) {
+        let hashedData = Crypto.SHA256(Crypto.util.hexToBytes(data), { asBytes: true });
+        // SHA3-256 from sha3.min.js
+      return hashedData;;  // Returns the hex string
+    }
+    
     //Check the public-key (or redeem-script) for the address (any blockchain)
     floCrypto.verifyPubKey = function (pubKeyHex, address) {
         let raw = decodeAddress(address);

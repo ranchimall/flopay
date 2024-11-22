@@ -1223,8 +1223,8 @@
                 <h4 class="margin-bottom-0-5">Receivers</h4>
                 <div id="receiver_container">
                     <fieldset class="receiver-card">
-                        <sm-input class="receiver-input" placeholder="Receiver address" data-bc-address
-                            error-text="Invalid address" animate required></sm-input>
+                        <sm-input class=receiver-input"" placeholder="Receiver address" data-bc-address
+                            error-text="Invalid address bs1" animate required></sm-input>
                         <div class="flex align-start gap-0-5 remove-card-wrapper">
                             <sm-input type="number" class="amount-input w-100" placeholder="Amount" min="0.0000001"
                                 step="0.00000001" error-text="Invalid amount" animate required>
@@ -1295,8 +1295,8 @@
     </sm-popup>
     </sm-popup>
     <sm-popup id="send_usdt_popup"
-        <header slot="header" class="popup__header">
-            <button class="popup__header__close justify-self-start">
+        <header slot="header" class="popup__header flex ">
+            <button class="popup__header__close justify-self-start flex ">
                 <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
                     <path d="M0 0h24v24H0V0z" fill="none" />
                     <path
@@ -1307,10 +1307,10 @@
         </header>
         <sm-form id="usdt_send_form" skip-submit>
             <div>
-                <h4 class="margin-bottom-0-5">Receivers</h4>
+                <h4 class="margin-bottom-0-10">Receivers</h4>
                 <div id="usdt_receiver_container">
                     <fieldset class="receiver-card">
-                        <sm-input class="receiver-address" placeholder="Receiver's Ethereum address" data-bc-address
+                        <sm-input class=receiver-address"" placeholder="Receiver's Ethereum address" data-eth-address
                             error-text="Invalid address" animate required></sm-input>
                            
                         <div class="flex align-start gap-0-5 remove-card-wrapper">
@@ -1357,7 +1357,7 @@
             <div id="usdt_error_section" class="hidden"></div>
             <div class="multi-state-button">
                 <button id="usdt_send_transaction" type="submit" class="button button--primary cta w-100"
-                    disabled>Send</button>
+                    >Send</button>
             </div>
         </sm-form>
     </sm-popup>
@@ -1718,6 +1718,7 @@
             }
         }
     </script>
+    
     <script> 
         /*jshint esversion: 9 */
         // Global variables
@@ -1822,7 +1823,7 @@
                     calculateFees()
                     break;
                 case 'send_usdt_popup':
-                    calculateFees();
+                    fetchSuggestedFees();
                     break;
                 case 'profile_popup':
                     renderElem(getRef('profile_popup__content'), render.profile())
@@ -2023,6 +2024,7 @@
             document.body.classList.remove('hidden')
             handleMobileChange(mobileQuery)
             document.querySelectorAll('sm-input[data-flo-id]').forEach(input => input.customValidation = floCrypto.validateAddr)
+            document.querySelectorAll('sm-input[data-eth-address]').forEach(input => input.customValidation = ethOperator.isValidAddress)
             getRef('receiver_container').querySelectorAll('sm-input[data-bc-address]').forEach(input => input.customValidation = btcOperator.validateAddress)
             document.addEventListener('keyup', (e) => {
                 if (e.key === 'Escape') {
@@ -2690,14 +2692,14 @@
         }
         document.addEventListener("DOMContentLoaded", () => {
     const addReceiverButton = document.getElementById("usdt_add_receiver");
-    const sendTransactionButton = document.getElementById("usdt_send_transaction");
+    // const sendTransactionButton = document.getElementById("usdt_send_transaction");
     const feeSelector = document.getElementById("usdt_fees_selector");
     // const feeInput = document.getElementById("usdt_fee_input");
     // const feeLoader = document.getElementById("usdt_fee_loader");
 
     addReceiverButton.addEventListener("click", addReceiverCard);
     feeSelector.addEventListener("change", handleFeeSelection);
-    sendTransactionButton.addEventListener("click", sendTransaction);
+    // sendTransactionButton.addEventListener("click", sendTransaction);
 });
 
 function addReceiverCard() {
@@ -2708,7 +2710,7 @@ function addReceiverCard() {
     newReceiverCard.classList.add("receiver-card");
 
     newReceiverCard.innerHTML = `
-        <sm-input class="receiver-address" placeholder="Receiver's Ethereum address" data-bc-address
+        <sm-input class="receiver-address" placeholder="Receiver's Ethereum address" data-eth-address
             error-text="Invalid address" animate required></sm-input>
         <div class="flex align-start gap-0-5 remove-card-wrapper">
             <sm-input type="number" class="receiver-amount w-100" placeholder="Amount" min="0.0000001"
@@ -2751,7 +2753,7 @@ function getProvider() {
       return new ethers.providers.JsonRpcProvider(`https://mainnet.infura.io/v3/6e12fee52bdd48208f0d82fb345bcb3c`)
     }
   }
-async function fetchSuggestedFees() {
+ async function fetchSuggestedFees() {
     try {
         console.log("Fetching suggested fees...");
         const provider = getProvider(); // Get provider (MetaMask or Infura)
@@ -2769,6 +2771,7 @@ async function fetchSuggestedFees() {
         const totalFeeInEther = ethers.utils.formatEther(totalFeeInWei);
         console.log("Total fee in Ether:", totalFeeInEther);
         
+        getRef('usdt_fee_input').value=totalFeeInEther;
         return totalFeeInEther;
     } catch (error) {
         console.error("Error fetching suggested fees:", error);
@@ -4344,7 +4347,16 @@ async function sendTransaction() {
                 });
         }
        
-       
+        async function calculateBtcFees() {
+            console.log("inside calc bttc fees");
+            
+            const [senders, privKeys, receivers, amounts] = await getTransactionInputs().catch(e => {
+                console.error(e)
+                return
+            });
+            // if (!senders.length || !privKeys.length || !receivers.length || !amounts.length) return;
+            return btcOperator.createSignedTx(senders, privKeys, receivers, amounts)
+        }
 
 
         const txParticipantsObserver = new MutationObserver(mutations => {
@@ -4422,6 +4434,21 @@ async function sendTransaction() {
                     break;
             }
         })
+        getRef('usdt_fees_selector').addEventListener('change', e => {
+            switch (e.target.value) {
+                case 'custom':
+                    getRef('usdt_fee_input').readOnly = false;
+                    getRef('usdt_fee_input').placeholder = 'Fee';
+                    renderElem(getRef('usdt_fee_tip'), html`Set custom fee`)
+                    FeeMemo.memoized = false
+                    break;
+                case 'suggested':
+                    calculateFees();
+                    getRef('usdt_fee_input').readOnly = true;
+                    break;
+            }
+
+        })
         function calculateApproxFee() {
             console.log(" inside calc approx fees")
             return new Promise((resolve, reject) => {
@@ -4441,16 +4468,37 @@ async function sendTransaction() {
                     })
             })
         }
+        const receiverInputs =[...getRef('usdt_receiver_container').querySelectorAll('.receiver-input')].filter(input => input.value.trim() !== '').map(input => input.value.trim());
+console.log("Receiver inputs:", receiverInputs);
+
         async function getTransactionInputs() {
             const privateKey = await floDapps.user.private.catch(err => console.log(err));
             const privKeys = btcOperator.convert.wif(privateKey);
             const senders = floGlobals.myBtcID;
-            const receivers = [...getRef('receiver_container').querySelectorAll('.receiver-input')].filter(input => input.value.trim() !== '').map(input => input.value.trim());
+            const receivers = [...getRef('receiver_container').querySelectorAll('.receiver-input')].filter(input => input.value.trim() !== '').map(input => input.value.trim());          
             const amounts = [...getRef('receiver_container').querySelectorAll('.amount-input')].filter(input => input.value.trim() !== '').map(input => {
                 return parseFloat(input.value.trim())
             });
             return [senders, privKeys, receivers, amounts]
         }
+       
+        async function getUsdtTransactionInputs() {
+    try {
+        const privateKey = await floDapps.user.private.catch(err => console.log(err));
+        console.log("private key inside getusdttransaction",privateKey)
+        const senders =floEthereum.ethAddressFromPrivateKey(privateKey);
+        let privKeys = coinjs.wif2privkey(privateKey);  // Convert WIF to private key object
+            privKeys = privKeys.privkey;  // Correctly access the "privkey" property
+            console.log("private Key privkey", privKeys);
+        const receivers = [...getRef('usdt_receiver_container').querySelectorAll('[data-eth-address]')].filter(input => input.value.trim() !== '').map(input => input.value.trim());
+        console.log('Receivers:', receivers); 
+        const amounts = [...getRef('usdt_receiver_container').querySelectorAll('.receiver-amount')].filter(input => input.value.trim() !== '').map(input => input.value.trim());
+        return [senders, privKeys, receivers, amounts];
+    } catch (error) {
+        console.error("Error getting transaction inputs:", error);
+        return [];
+    }
+}
 
         getRef('receiver_container').addEventListener('input', debounce(calculateFees, 300))
         let feeMemo = {
@@ -4472,7 +4520,7 @@ async function sendTransaction() {
                 fill: 'forwards'
             }
             getRef('send_fee_loader').animate(fadeIn, animOptions)
-            // getRef('usdt_fees_section').classList.remove('hidden')
+             getRef('usdt_fees_section').classList.remove('hidden')
             getRef('error_section').classList.add('hidden')
             if (allValid) {
                 getRef('send_fee').placeholder = 'Fee'
@@ -4519,35 +4567,159 @@ async function sendTransaction() {
 
 
 
-        // getRef('').onclick = evt => {
-        //     buttonLoader('send_transaction', true)
-        //     floDapps.user.private.then(async privateKey => {
-        //         const [senders, privKeys, receivers, amounts] = await getTransactionInputs().catch(err => console.log(err));
-        //         const fee = parseFloat(getRef('send_fee').value.trim());
-        //         console.debug(senders, receivers, amounts, fee);
-        //         btcOperator.sendTx(senders, privKeys, receivers, amounts, fee).then(txid => {
-        //             console.log(txid);
-        //             closePopup();
-        //             getRef('txid').value = txid;
-        //             openPopup('txid_popup');
-        //             getRef('send_tx').reset()
-        //             if (!floGlobals.isMobileView && !floGlobals.isSubAdmin && appState.currentPage === 'home')
-        //                 render.recentTransactions();
-        //             else if (!floGlobals.isSubAdmin && appState.currentPage === 'history')
-        //                 render.transactionsHistory();
-        //         }).catch(error => {
-        //             notify(`Error sending transaction \n ${error}`, 'error');
-        //         }).finally(_ => {
-        //             buttonLoader('send_transaction', false)
-        //         })
-        //     }).catch(error => {
-        //         console.log(error);
-        //         notify('Invalid password', 'error');
-        //         closePopup();
-        //         return false;
-        //     })
-        // }
+        getRef('send_transaction').onclick = evt => {
+        console.log("inside send Transactions")
+            buttonLoader('send_transaction', true)
+            floDapps.user.private.then(async privateKey => {
+                const [senders, privKeys, receivers, amounts] = await getTransactionInputs().catch(err => console.log(err));
+                const fee = parseFloat(getRef('send_fee').value.trim());
+                console.debug(senders, receivers, amounts, fee);
+                btcOperator.sendTx(senders, privKeys, receivers, amounts, fee).then(txid => {
+                    console.log(txid);
+                    closePopup();
+                    getRef('txid').value = txid;
+                    openPopup('txid_popup');
+                    getRef('send_tx').reset()
+                    if (!floGlobals.isMobileView && !floGlobals.isSubAdmin && appState.currentPage === 'home')
+                        render.recentTransactions();
+                    else if (!floGlobals.isSubAdmin && appState.currentPage === 'history')
+                        render.transactionsHistory();
+                }).catch(error => {
+                    notify(`Error sending transaction \n ${error}`, 'error');
+                }).finally(_ => {
+                    buttonLoader('send_transaction', false)
+                })
+            }).catch(error => {
+                console.log(error);
+                notify('Invalid password', 'error');
+                closePopup();
+                return false;
+            })
+        }
+        getRef('usdt_send_transaction').onclick = async (event) => {
+    event.preventDefault();
 
+    try {
+        // Get transaction inputs
+        const [senders, privateKey, receivers, amounts] = await getUsdtTransactionInputs();
+        console.log(senders, privateKey, receivers, amounts)
+
+        if (!privateKey) {
+            notify('Private key is required to send USDT.', 'error');
+            return;
+        }
+        if (receivers.length === 0 || amounts.length === 0) {
+            notify('Please provide at least one valid receiver address and amount.', 'error');
+            return;
+        }
+        for (let i = 0; i < receivers.length; i++) {
+            if (!ethers.utils.isAddress(receivers[i])) {
+                notify(`Invalid Ethereum address for receiver ${i + 1}: ${receivers[i]}`, 'error');
+                return;
+            }
+            if (isNaN(amounts[i]) || amounts[i] <= 0) {
+                notify(`Invalid amount for receiver ${i + 1}: ${amounts[i]}`, 'error');
+                return;
+            }
+        }
+
+        // Confirm the transaction
+        const confirmation = await getConfirmation('Send USDT', {
+            message: `You are about to send the following USDT transactions:\n${receivers
+                .map((receiver, i) => `${amounts[i]} USDT to ${receiver}`)
+                .join('\n')}`,
+            confirmText: 'Send',
+        });
+        if (!confirmation) return
+                if (/^[0-9a-fA-F]{64}$/.test(privateKey)) {
+                    privateKey = coinjs.wif2privkey(privateKey)
+                }
+        // Show loader on the button
+        buttonLoader('usdt_send_transaction', true);
+
+        // Execute transactions for each receiver
+        for (let i = 0; i < receivers.length; i++) {
+            const tx = await ethOperator.sendToken({
+                privateKey,
+                receiver: receivers[i],
+                amount: amounts[i].toString(),
+                token: 'usdt',
+            });
+
+            // Show transaction as pending
+            showTransactionResult('pending', { txHash: tx.hash });
+
+            // Wait for confirmation
+            await tx.wait();
+
+            // Show transaction as confirmed
+            showTransactionResult('confirmed', { txHash: tx.hash });
+        }
+
+        // Reset form and close popup
+        document.getElementById('usdt_send_form').reset();
+        closePopup('send_usdt_popup');
+    } catch (error) {
+        console.error('Error sending USDT transaction:', error);
+        notify(`Error sending USDT transaction: ${error.message}`, 'error');
+
+        // Show failed transaction result
+        showTransactionResult('failed', { description: error.message });
+    } finally {
+        buttonLoader('usdt_send_transaction', false);
+    }
+};
+
+
+
+        function showTransactionResult(status, { txHash, description = '' }) {
+            switch (status) {
+                case 'pending':
+                    renderElem(getRef('transaction_result_popup__content'), html`
+                        <ul>
+                            <li class="transaction__phase">
+                                <svg class="icon confirmed" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"> <path d="M0 0h24v24H0V0z" fill="none" /> <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" /> </svg>
+                                <h4>Transaction sent</h4>
+                            </li>
+                            <li class="transaction__phase">
+                                <sm-spinner></sm-spinner>
+                                <p>Waiting for transaction to be confirmed</p>
+                            </li>
+                        </ul>
+                        <div class="grid">
+                            <span class="label">Transaction ID</span>
+                            <sm-copy value=${txHash}></sm-copy>
+                        </div>
+                        <a class="button button--primary" target="_blank" href=${`https://etherscan.io/tx/${txHash}`}>Check transaction status</a>
+                    `)
+                    break;
+                case 'confirmed':
+                    renderElem(getRef('transaction_result_popup__content'), html`
+                        <svg class="icon user-action-result__icon confirmed" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"> <path d="M0 0h24v24H0V0z" fill="none" /> <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" /> </svg>
+                        <div class="grid gap-0-5 justify-center text-center">
+                            <h4>Transaction confirmed</h4>
+                            <p>Transaction has been confirmed on the blockchain. </p>
+                        </div>
+                        <div class="grid">
+                            <span class="label">Transaction ID</span>
+                            <sm-copy value=${txHash}></sm-copy>
+                        </div>
+                        <a class="button button--primary" target="_blank" href=${`https://etherscan.io/tx/${txHash}`}>Check transaction status</a>
+                    `)
+                    break;
+                case 'failed':
+                    renderElem(getRef('transaction_result_popup__content'), html`
+                            <svg class="icon user-action-result__icon failed" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                            <div class="grid gap-0-5 justify-center text-center">
+                                <h4>Transaction failed</h4>
+                                <p>${description}</p>
+                            </div>
+                        `)
+                    break;
+            }
+            openPopup('transaction_result_popup')
+        }
+      
         const assetIcons = {
             btc: ` <svg class="icon" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"> <g> <rect fill="none" height="24" width="24"></rect> </g> <g> <path d="M17.06,11.57C17.65,10.88,18,9.98,18,9c0-1.86-1.27-3.43-3-3.87L15,3h-2v2h-2V3H9v2H6v2h2v10H6v2h3v2h2v-2h2v2h2v-2 c2.21,0,4-1.79,4-4C19,13.55,18.22,12.27,17.06,11.57z M10,7h4c1.1,0,2,0.9,2,2s-0.9,2-2,2h-4V7z M15,17h-5v-4h5c1.1,0,2,0.9,2,2 S16.1,17,15,17z"> </path> </g> </svg> `,
             usd: `<svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>`,
@@ -4745,6 +4917,8 @@ async function sendTransaction() {
                 }
             })
         }
+       
+   
     </script>
 </body>
 
