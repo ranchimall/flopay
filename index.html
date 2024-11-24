@@ -1295,19 +1295,22 @@
     </sm-popup>
     </sm-popup>
     <sm-popup id="send_usdt_popup"
-        <header slot="header" class="popup__header flex ">
-            <button class="popup__header__close justify-self-start flex ">
-                <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
-                    <path d="M0 0h24v24H0V0z" fill="none" />
-                    <path
-                        d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
-                </svg>
-            </button>
-            <h3>Send USDT</h3>
-        </header>
+    <header slot="header" class="popup__header " style="display: grid;">
+        <button class="popup__header__close justify-self-start "style="right: 0% ; height:5px;width:5px;" >
+            <svg class="icon" xmlns="http://www.w3.org/2000/svg" style="right: 50%;" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
+                <path d="M0 0h24v24H0V0z" fill="none" />
+                <path
+                    d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+            </svg>
+        </button>
+        <h3 class="popup__header__title" style="margin-top: -7%;">Send USDT</h3>
+        <br/>
+    </header>
+    
         <sm-form id="usdt_send_form" skip-submit>
             <div>
-                <h4 class="margin-bottom-0-10">Receivers</h4>
+                <br/>
+                <h4 class="margin-bottom-0-10 margin-left-0-5" style="margin-left:-75%">Receivers</h4>
                 <div id="usdt_receiver_container">
                     <fieldset class="receiver-card">
                         <sm-input class=receiver-address"" placeholder="Receiver's Ethereum address" data-eth-address
@@ -1935,6 +1938,7 @@
                     break;
             }
             getRef("notification_drawer").push(message, { icon, ...options });
+            console.log("the mose is ",mode)
             if (mode === 'error') {
                 console.error(message)
             }
@@ -4486,10 +4490,10 @@ console.log("Receiver inputs:", receiverInputs);
     try {
         const privateKey = await floDapps.user.private.catch(err => console.log(err));
         console.log("private key inside getusdttransaction",privateKey)
-        const senders =floEthereum.ethAddressFromPrivateKey(privateKey);
         let privKeys = coinjs.wif2privkey(privateKey);  // Convert WIF to private key object
             privKeys = privKeys.privkey;  // Correctly access the "privkey" property
             console.log("private Key privkey", privKeys);
+        const senders =floEthereum.ethAddressFromPrivateKey(privKeys);
         const receivers = [...getRef('usdt_receiver_container').querySelectorAll('[data-eth-address]')].filter(input => input.value.trim() !== '').map(input => input.value.trim());
         console.log('Receivers:', receivers); 
         const amounts = [...getRef('usdt_receiver_container').querySelectorAll('.receiver-amount')].filter(input => input.value.trim() !== '').map(input => input.value.trim());
@@ -4602,23 +4606,34 @@ console.log("Receiver inputs:", receiverInputs);
     try {
         // Get transaction inputs
         const [senders, privateKey, receivers, amounts] = await getUsdtTransactionInputs();
-        console.log(senders, privateKey, receivers, amounts)
+        
+        // Log specific details for debugging
+        console.log("Senders:", senders);
+        console.log("Private Key:", privateKey);
+        console.log("Receivers:", receivers);
+        console.log("Amounts:", amounts);
 
         if (!privateKey) {
             notify('Private key is required to send USDT.', 'error');
+            console.error("Private key is missing!");
             return;
         }
         if (receivers.length === 0 || amounts.length === 0) {
             notify('Please provide at least one valid receiver address and amount.', 'error');
+            console.error("Receivers or amounts are empty:", { receivers, amounts });
             return;
         }
+
         for (let i = 0; i < receivers.length; i++) {
+            console.log(`Validating receiver ${i + 1}: ${receivers[i]} with amount: ${amounts[i]}`);
             if (!ethers.utils.isAddress(receivers[i])) {
                 notify(`Invalid Ethereum address for receiver ${i + 1}: ${receivers[i]}`, 'error');
+                console.error(`Invalid Ethereum address detected: ${receivers[i]}`);
                 return;
             }
             if (isNaN(amounts[i]) || amounts[i] <= 0) {
                 notify(`Invalid amount for receiver ${i + 1}: ${amounts[i]}`, 'error');
+                console.error(`Invalid amount detected for receiver ${i + 1}: ${amounts[i]}`);
                 return;
             }
         }
@@ -4630,21 +4645,35 @@ console.log("Receiver inputs:", receiverInputs);
                 .join('\n')}`,
             confirmText: 'Send',
         });
-        if (!confirmation) return
-                if (/^[0-9a-fA-F]{64}$/.test(privateKey)) {
-                    privateKey = coinjs.wif2privkey(privateKey)
-                }
+        if (!confirmation) return;
+
+        // Validate private key format
+        if (!/^[0-9a-fA-F]{64}$/.test(privateKey)) {
+            let privKeys = coinjs.wif2privkey(privateKey);
+            if (privKeys && privKeys.privkey) {
+                privateKey = privKeys.privkey;
+                console.log("Converted private key:", privateKey);
+            } else {
+                notify("Invalid private key format.", "error");
+                console.error("Private key conversion failed:", privKeys);
+                return;
+            }
+        }
+
         // Show loader on the button
         buttonLoader('usdt_send_transaction', true);
 
         // Execute transactions for each receiver
         for (let i = 0; i < receivers.length; i++) {
+            console.log(`Sending ${amounts[i]} USDT to ${receivers[i]}...`);
             const tx = await ethOperator.sendToken({
                 privateKey,
                 receiver: receivers[i],
                 amount: amounts[i].toString(),
                 token: 'usdt',
             });
+
+            console.log(`Transaction hash for receiver ${i + 1}:`, tx.hash);
 
             // Show transaction as pending
             showTransactionResult('pending', { txHash: tx.hash });
@@ -4669,7 +4698,6 @@ console.log("Receiver inputs:", receiverInputs);
         buttonLoader('usdt_send_transaction', false);
     }
 };
-
 
 
         function showTransactionResult(status, { txHash, description = '' }) {

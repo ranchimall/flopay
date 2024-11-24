@@ -626,6 +626,8 @@ ol li::before {
   align-items: center;
   grid-template-columns: auto 1fr;
   flex-wrap: nowrap;
+  display: flex;
+  justify-content: space
 }
 .popup__header > * {
   grid-row: 1;
