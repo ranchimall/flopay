@@ -1303,7 +1303,8 @@
                     d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
             </svg>
         </button>
-        <h3 class="popup__header__title" style="margin-top: -7%;">Send USDT</h3>
+        <h3 class="popup__header__title" style="margin-top: -7%;">
+            Send USDT</h3>
         <br/>
     </header>
     
@@ -1357,9 +1358,23 @@
                     </div>
                 </div>
             </div>
-            <div id="usdt_error_section" class="hidden"></div>
+            <sm-popup id="transaction_result_popup">
+                <header slot="header" class="popup__header">
+                    <div class="flex align-center">
+                        <button class="popup__header__close" onclick="closePopup()">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"
+                                fill="#000000">
+                                <path d="M0 0h24v24H0V0z" fill="none" />
+                                <path
+                                    d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+                            </svg>
+                        </button>
+                    </div>
+                </header>
+                <div id="transaction_result_popup__content" class="grid gap-2"></div>
+            </sm-popup>
             <div class="multi-state-button">
-                <button id="usdt_send_transaction" type="submit" class="button button--primary cta w-100"
+                <button id="usdt_send_transaction" type="submit" class="button button--primary cta w-100" onclick="sendTx()"
                     >Send</button>
             </div>
         </sm-form>
@@ -1427,6 +1442,7 @@
             </button>
         </sm-form>
     </sm-popup>
+   
     <sm-popup id="external_transfer_popup">
         <header slot="header" class="popup__header">
             <button class="popup__header__close justify-self-start">
@@ -4600,24 +4616,28 @@ console.log("Receiver inputs:", receiverInputs);
                 return false;
             })
         }
+       
         getRef('usdt_send_transaction').onclick = async (event) => {
     event.preventDefault();
 
     try {
         // Get transaction inputs
         const [senders, privateKey, receivers, amounts] = await getUsdtTransactionInputs();
-        
-        // Log specific details for debugging
+
+        // Debugging logs
         console.log("Senders:", senders);
         console.log("Private Key:", privateKey);
         console.log("Receivers:", receivers);
         console.log("Amounts:", amounts);
-
+        
+        // Input validation
+      
         if (!privateKey) {
             notify('Private key is required to send USDT.', 'error');
             console.error("Private key is missing!");
             return;
         }
+
         if (receivers.length === 0 || amounts.length === 0) {
             notify('Please provide at least one valid receiver address and amount.', 'error');
             console.error("Receivers or amounts are empty:", { receivers, amounts });
@@ -4666,41 +4686,60 @@ console.log("Receiver inputs:", receiverInputs);
         // Execute transactions for each receiver
         for (let i = 0; i < receivers.length; i++) {
             console.log(`Sending ${amounts[i]} USDT to ${receivers[i]}...`);
-            const tx = await ethOperator.sendToken({
-                privateKey,
-                receiver: receivers[i],
-                amount: amounts[i].toString(),
-                token: 'usdt',
-            });
 
-            console.log(`Transaction hash for receiver ${i + 1}:`, tx.hash);
+            let tx;
+            try {
+                // Send token transaction
+                tx = await ethOperator.sendToken({
+                    privateKey,
+                    receiver: receivers[i],
+                    amount: amounts[i].toString(),
+                    token: 'usdt',
+                });
 
-            // Show transaction as pending
-            showTransactionResult('pending', { txHash: tx.hash });
+                if (!tx || !tx.hash) {
+                    throw new Error('Transaction failed or tx.hash is undefined');
+                }
 
-            // Wait for confirmation
-            await tx.wait();
+                console.log(`Transaction hash for receiver ${i + 1}:`, tx.hash);
 
-            // Show transaction as confirmed
-            showTransactionResult('confirmed', { txHash: tx.hash });
+                // Show transaction as pending
+                showTransactionResult('pending', { txHash: tx.hash });
+
+                // Wait for confirmation
+                await tx.wait();
+
+                // Show transaction as confirmed
+                showTransactionResult('confirmed', { txHash: tx.hash });
+            } catch (error) {
+                console.error(`Error during transaction for receiver ${i + 1}:`, error);
+                notify(`${error.message}`, 'error');
+                
+                showTransactionResult('failed', { description: error.message });
+                // Show failed transaction result
+            }
         }
 
         // Reset form and close popup
         document.getElementById('usdt_send_form').reset();
         closePopup('send_usdt_popup');
     } catch (error) {
-        console.error('Error sending USDT transaction:', error);
         notify(`Error sending USDT transaction: ${error.message}`, 'error');
+        console.error('Error sending USDT transaction:', error);
 
         // Show failed transaction result
         showTransactionResult('failed', { description: error.message });
     } finally {
+        // Reset button loader
         buttonLoader('usdt_send_transaction', false);
     }
 };
 
 
+
         function showTransactionResult(status, { txHash, description = '' }) {
+            console.log("Transaction Data:", { txHash, description });
+
             switch (status) {
                 case 'pending':
                     renderElem(getRef('transaction_result_popup__content'), html`

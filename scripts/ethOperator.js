@@ -242,12 +242,11 @@
     }
     function getProvider() {
       console.log("insidee getProvider")
-      // switches provider based on whether the user is using MetaMask or not
       if (window.ethereum) {
-        console.log("Successful window.etherum");
+      
         return new ethers.providers.Web3Provider(window.ethereum);
       } else {
-        console.log("UNSuccessful window.etherum");
+      
         return new ethers.providers.JsonRpcProvider(`https://mainnet.infura.io/v3/6e12fee52bdd48208f0d82fb345bcb3c`)
       }
     }
@@ -332,18 +331,67 @@
         throw new Error(e)
       }
     }
+    function notify(message, mode, options = {}) {
+      let icon
+      switch (mode) {
+          case 'success':
+              icon = `<svg class="icon icon--success" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M10 15.172l9.192-9.193 1.415 1.414L10 18l-6.364-6.364 1.414-1.414z"/></svg>`
+              break;
+          case 'error':
+              icon = `<svg class="icon icon--error" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24"><path fill="none" d="M0 0h24v24H0z"/><path d="M12 22C6.477 22 2 17.523 2 12S6.477 2 12 2s10 4.477 10 10-4.477 10-10 10zm-1-7v2h2v-2h-2zm0-8v6h2V7h-2z"/></svg>`
+              options.pinned = true
+              break;
+      }
+      getRef("notification_drawer").push(message, { icon, ...options });
+      console.log("the mose is ",mode)
+      if (mode === 'error') {
+          console.error(message)
+      }
+  }
+    const sendToken = ethOperator.sendToken = async ({ token, privateKey, amount, receiver, contractAddress }) => {
+      console.log("Inside sendToken");
   
-    const sendToken = ethOperator.sendToken = async ({  token, privateKey, amount, receiver, contractAddress }) => {
-      // Create a wallet using the private key
-      console.log("inside sendToken private key ",privateKey)
       const wallet = new ethers.Wallet(privateKey, getProvider());
-      // Contract interface
-      const tokenContract = new ethers.Contract(CONTRACT_ADDRESSES[token] || contractAddress, ERC20ABI, wallet);
-      console.log(" token congtract",tokenContract)
-      // Convert the amount to the smallest unit of USDC (wei)
-      const amountWei = ethers.utils.parseUnits(amount.toString(), 6); // Assuming 6 decimals for USDC
+      console.log("Wallet Address:", wallet.address);
   
-      // Call the transfer function on the USDC contract
-      return tokenContract.transfer(receiver, amountWei)
-    }
+      const tokenContract = new ethers.Contract(CONTRACT_ADDRESSES[token] || contractAddress, ERC20ABI, wallet);
+      console.log("Token Contract Address:", tokenContract.address);
+  
+      const amountWei = ethers.utils.parseUnits(amount.toString(), 6);
+      console.log("Amount in Wei:", amountWei.toString());
+  
+      //Check balances
+      const ethBalance = await wallet.getBalance();
+      const usdtBalance = await tokenContract.balanceOf(wallet.address);
+  
+      console.log("ETH Balance:", ethers.utils.formatEther(ethBalance));
+      console.log("USDT Balance:", ethers.utils.formatUnits(usdtBalance, 6));
+  
+      if (usdtBalance.lt(amountWei)) {
+          throw new Error("Insufficient USDT balance.");
+          
+      }
+  
+      if (ethBalance.lt(ethers.utils.parseEther("0.01"))) {
+          throw new Error("Insufficient ETH balance for gas fees.");
+      }
+  
+      // Perform transfer
+      try {
+          const tx = await tokenContract.transfer(receiver, amountWei, { gasLimit: 100000 });
+          console.log("Raw Transaction:", tx);
+  
+          if (!tx.hash) {
+              throw new Error("Transaction failed or tx.hash is undefined");
+          }
+  
+          console.log("Transaction Hash:", tx.hash);
+          await tx.wait();
+          return tx;
+      } catch (error) {
+          console.error("Error during transaction:", error);
+          throw error; // Re-throw error for upstream handling
+      }
+  };
+  
   })('object' === typeof module ? module.exports : window.ethOperator = {});
