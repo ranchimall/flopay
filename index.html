@@ -1358,28 +1358,29 @@
                     </div>
                 </div>
             </div>
-            <sm-popup id="transaction_result_popup">
-                <header slot="header" class="popup__header">
-                    <div class="flex align-center">
-                        <button class="popup__header__close" onclick="closePopup()">
-                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"
-                                fill="#000000">
-                                <path d="M0 0h24v24H0V0z" fill="none" />
-                                <path
-                                    d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
-                            </svg>
-                        </button>
-                    </div>
-                </header>
-                <div id="transaction_result_popup__content" class="grid gap-2"></div>
-            </sm-popup>
+            
             <div class="multi-state-button">
-                <button id="usdt_send_transaction" type="submit" class="button button--primary cta w-100" onclick="sendTx()"
-                    >Send</button>
+                <button id="usdt_send_transaction" type="submit" class="button button--primary cta w-100" 
+                >Send</button>
             </div>
         </sm-form>
     </sm-popup>
-    
+
+    <sm-popup id="transaction_result_popup">
+        <header slot="header" class="popup__header">
+            <div class="flex align-center">
+                <button class="popup__header__close" onclick="closePopup()">
+                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"
+                        fill="#000000">
+                        <path d="M0 0h24v24H0V0z" fill="none" />
+                        <path
+                            d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+                    </svg>
+                </button>
+            </div>
+        </header>
+        <div id="transaction_result_popup__content" class="grid gap-2"></div>
+    </sm-popup>
     
     <sm-popup id="txid_popup">
         <header slot="header" class="popup__header">
@@ -2712,14 +2713,11 @@
         }
         document.addEventListener("DOMContentLoaded", () => {
     const addReceiverButton = document.getElementById("usdt_add_receiver");
-    // const sendTransactionButton = document.getElementById("usdt_send_transaction");
     const feeSelector = document.getElementById("usdt_fees_selector");
-    // const feeInput = document.getElementById("usdt_fee_input");
-    // const feeLoader = document.getElementById("usdt_fee_loader");
-
+    
     addReceiverButton.addEventListener("click", addReceiverCard);
     feeSelector.addEventListener("change", handleFeeSelection);
-    // sendTransactionButton.addEventListener("click", sendTransaction);
+   
 });
 
 function addReceiverCard() {
@@ -4458,9 +4456,9 @@ async function sendTransaction() {
             switch (e.target.value) {
                 case 'custom':
                     getRef('usdt_fee_input').readOnly = false;
-                    getRef('usdt_fee_input').placeholder = 'Fee';
+                    getRef('usdt_fee_input').placeholder = ' USDT Fee';
                     renderElem(getRef('usdt_fee_tip'), html`Set custom fee`)
-                    FeeMemo.memoized = false
+                    feeMemo.memoized = false
                     break;
                 case 'suggested':
                     calculateFees();
@@ -4657,7 +4655,7 @@ console.log("Receiver inputs:", receiverInputs);
                 return;
             }
         }
-
+       // showTransactionResult('failed', { description: "Failed " });
         // Confirm the transaction
         const confirmation = await getConfirmation('Send USDT', {
             message: `You are about to send the following USDT transactions:\n${receivers
@@ -4705,18 +4703,16 @@ console.log("Receiver inputs:", receiverInputs);
 
                 // Show transaction as pending
                 showTransactionResult('pending', { txHash: tx.hash });
-
+                console.log("Transaction Pending")
                 // Wait for confirmation
                 await tx.wait();
 
                 // Show transaction as confirmed
                 showTransactionResult('confirmed', { txHash: tx.hash });
+                console.log("Transaction Successful")
             } catch (error) {
-                console.error(`Error during transaction for receiver ${i + 1}:`, error);
                 notify(`${error.message}`, 'error');
-                
-                showTransactionResult('failed', { description: error.message });
-                // Show failed transaction result
+                showTransactionResult('failed', { description: "Failed " });
             }
         }
 
@@ -4724,7 +4720,7 @@ console.log("Receiver inputs:", receiverInputs);
         document.getElementById('usdt_send_form').reset();
         closePopup('send_usdt_popup');
     } catch (error) {
-        notify(`Error sending USDT transaction: ${error.message}`, 'error');
+       // notify(`Error sending USDT transaction: ${error.message}`, 'error');
         console.error('Error sending USDT transaction:', error);
 
         // Show failed transaction result
