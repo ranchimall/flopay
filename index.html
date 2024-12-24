@@ -1843,6 +1843,7 @@
                     calculateFees()
                     break;
                 case 'send_usdt_popup':
+                    console.log("going to fetch")
                     fetchSuggestedFees();
                     break;
                 case 'profile_popup':
@@ -2711,14 +2712,6 @@
                     startStatusInterval()
             }
         }
-        document.addEventListener("DOMContentLoaded", () => {
-    const addReceiverButton = document.getElementById("usdt_add_receiver");
-    const feeSelector = document.getElementById("usdt_fees_selector");
-    
-    addReceiverButton.addEventListener("click", addReceiverCard);
-    feeSelector.addEventListener("change", handleFeeSelection);
-   
-});
 
 function addReceiverCard() {
     console.log(" inside add Reaciever");
@@ -2739,28 +2732,7 @@ function addReceiverCard() {
     receiverContainer.appendChild(newReceiverCard);
 }
 
-async function handleFeeSelection(event) {
-    const feeType = event.target.value;
-    const feeInput = document.getElementById("usdt_fee_input");
-    const feeLoader = document.getElementById("usdt_fee_loader");
 
-    feeInput.value = "";
-
-    if (feeType === "suggested") {
-        feeLoader.classList.remove("hidden");
-        try {
-            const suggestedFee = await fetchSuggestedFees();
-            console.log("Suggested fee:", suggestedFee);
-            feeInput.value = suggestedFee;
-        } catch (error) {
-            alert("Failed to fetch fees. Please try again.");
-        } finally {
-            feeLoader.classList.add("hidden");
-        }
-    } else {
-        feeInput.removeAttribute("readonly");
-    }
-}
 function getProvider() {
     // switches provider based on whether the user is using MetaMask or not
     if (window.ethereum) {
@@ -2771,8 +2743,68 @@ function getProvider() {
       return new ethers.providers.JsonRpcProvider(`https://mainnet.infura.io/v3/6e12fee52bdd48208f0d82fb345bcb3c`)
     }
   }
- async function fetchSuggestedFees() {
+
+//   async function fetchSuggestedFees() {
+//     const feeSelector = getRef('usdt_fees_selector');
+//     const feeInput = getRef('usdt_fee_input');
+//     const feeLoader = getRef('usdt_fee_loader');
+//     const sendButton = getRef('usdt_send_transaction');
+//     const feeTip = getRef('usdt_fee_tip');
+//     const errorSection = getRef('error_section');
+//     const feesSection = getRef('usdt_fees_section');
+//     const receivers = [...getRef('usdt_receiver_container').querySelectorAll('.receiver-address, .receiver-amount')];
+
+//     // Handle custom fees
+//     if (feeSelector.value === 'custom') {
+//         feeInput.removeAttribute('readonly');
+//         feeTip.textContent = '*Enter custom fees.';
+//         return;
+//     }
+
+//     // Initial UI setup
+//     feeInput.setAttribute('readonly', true);
+//     feeInput.value = '';
+//     feeTip.textContent = 'Fetching suggested fees...';
+//     feeLoader.classList.remove('hidden');
+//     feesSection.classList.remove('hidden');
+//     sendButton.disabled = true;
+
+//     // Validate receiver inputs
+//     const allValid = receivers.every(input => input.isValid);
+//     if (!allValid) {
+//         feeTip.textContent = '*Complete all fields for accurate fees!';
+//         feeLoader.classList.add('hidden');
+//         return;
+//     }
+
+//     try {
+//         // Fetch provider and calculate fees
+//         const provider = getProvider(); // Fetch provider (e.g., MetaMask or Infura)
+//         const gasPrice = await provider.getGasPrice(); // Gas price in Wei
+//         const gasLimit = 50000; // Estimated gas for ERC-20 transfers
+//         const totalFeeInWei = gasPrice.mul(gasLimit); // Calculate total fee in Wei
+//         const totalFeeInEther = ethers.utils.formatEther(totalFeeInWei); // Convert to Ether
+
+//         // Update fee input with calculated fee
+//         feeInput.value = totalFeeInEther;
+//         feeTip.textContent = '';
+//         sendButton.disabled = false;
+//     } catch (error) {
+//         // Error handling
+//         feesSection.classList.add('hidden');
+//         errorSection.classList.remove('hidden');
+//         feeTip.textContent = 'Error calculating fees. Try again or use custom fees.';
+//         console.error('Fee Calculation Error:', error);
+//     } finally {
+//         // Hide loader
+//         feeLoader.classList.add('hidden');
+//     }
+// }
+
+async function fetchSuggestedFees() {
     try {
+        // Check if custom fees are selected
+       
         console.log("Fetching suggested fees...");
         const provider = getProvider(); // Get provider (MetaMask or Infura)
 
@@ -2788,15 +2820,17 @@ function getProvider() {
         // Convert fee to Ether for readability
         const totalFeeInEther = ethers.utils.formatEther(totalFeeInWei);
         console.log("Total fee in Ether:", totalFeeInEther);
-        
-        getRef('usdt_fee_input').value=totalFeeInEther;
+
+        // Set the fee input value
+        getRef('usdt_fee_input').value = totalFeeInEther;
+
         return totalFeeInEther;
+        
     } catch (error) {
         console.error("Error fetching suggested fees:", error);
         throw new Error("Failed to calculate fees.");
     }
 }
-
 
 
 async function sendTransaction() {
@@ -4455,13 +4489,16 @@ async function sendTransaction() {
         getRef('usdt_fees_selector').addEventListener('change', e => {
             switch (e.target.value) {
                 case 'custom':
+                console.log("feeinput = custom");
                     getRef('usdt_fee_input').readOnly = false;
                     getRef('usdt_fee_input').placeholder = ' USDT Fee';
+                    getRef('usdt_fee_input').value = '';
                     renderElem(getRef('usdt_fee_tip'), html`Set custom fee`)
                     feeMemo.memoized = false
                     break;
                 case 'suggested':
-                    calculateFees();
+                    console.log("feeinput = suggested");
+                    fetchSuggestedFees();
                     getRef('usdt_fee_input').readOnly = true;
                     break;
             }
@@ -4538,7 +4575,6 @@ console.log("Receiver inputs:", receiverInputs);
                 fill: 'forwards'
             }
             getRef('send_fee_loader').animate(fadeIn, animOptions)
-             getRef('usdt_fees_section').classList.remove('hidden')
             getRef('error_section').classList.add('hidden')
             if (allValid) {
                 getRef('send_fee').placeholder = 'Fee'
@@ -4547,7 +4583,6 @@ console.log("Receiver inputs:", receiverInputs);
                     renderElem(getRef('selected_fee_tip'), html``)
                     getRef('send_transaction').disabled = false;
                 }).catch(e => {
-                    getRef('usdt_fees_section').classList.add('hidden')
                     getRef('error_section').classList.remove('hidden')
                     renderElem(getRef('error_section'), html`
                         <p class="error flex align-center gap-0-5">
@@ -4655,8 +4690,6 @@ console.log("Receiver inputs:", receiverInputs);
                 return;
             }
         }
-       // showTransactionResult('failed', { description: "Failed " });
-        // Confirm the transaction
         const confirmation = await getConfirmation('Send USDT', {
             message: `You are about to send the following USDT transactions:\n${receivers
                 .map((receiver, i) => `${amounts[i]} USDT to ${receiver}`)
@@ -4711,6 +4744,7 @@ console.log("Receiver inputs:", receiverInputs);
                 showTransactionResult('confirmed', { txHash: tx.hash });
                 console.log("Transaction Successful")
             } catch (error) {
+                cosole.log("failed")
                 notify(`${error.message}`, 'error');
                 showTransactionResult('failed', { description: "Failed " });
             }
