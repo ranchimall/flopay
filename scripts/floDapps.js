@@ -292,7 +292,7 @@
           "Error fetching USDT balance.";
         return;
       }
-      console.log("USDT Balance:", usdtBalance);
+      // console.log("USDT Balance:", usdtBalance);
       document.getElementById("usdt_balance").innerText = usdtBalance + " USDT";
     } catch (error) {
       console.error("Unexpected error in updateUSDTBalance:", error);

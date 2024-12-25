@@ -1311,7 +1311,8 @@
         <sm-form id="usdt_send_form" skip-submit>
             <div>
                 <br/>
-                <h4 class="margin-bottom-0-10 margin-left-0-5" style="margin-left:-75%">Receivers</h4>
+                <h4 class="margin-bottom-0-10 margin-left-0-5" style="margin-left:-75%">
+                    Receivers</h4>
                 <div id="usdt_receiver_container">
                     <fieldset class="receiver-card">
                         <sm-input class=receiver-address"" placeholder="Receiver's Ethereum address" data-eth-address
@@ -4848,24 +4849,24 @@ getRef('usdt_send_transaction').onclick = async (event) => {
 
                 console.log(`Transaction hash for receiver ${i + 1}:`, tx.hash);
 
-                // Show transaction as pending
+                getRef('usdt_send_form').reset() 
+                closePopup();
                 getRef('txid').value = tx.hash; // Set transaction hash
-                openPopup('txid_popup'); // Open the popup to show the transaction hash
-                await tx.wait();
-
-                // Notify transaction success
-                //notify(`Transaction ${tx.hash} confirmed!`, 'success');
+                openPopup('txid_popup');
                 console.log("Transaction Successful");
+                if (!floGlobals.isMobileView && !floGlobals.isSubAdmin && appState.currentPage === 'home')
+                        render.recentTransactions();
+                    else if (!floGlobals.isSubAdmin && appState.currentPage === 'history')
+                        render.transactionsHistory();
+       
             } catch (error) {
                 // Notify and show failed transaction result
+                getRef('usdt_send_form').reset() 
+                closePopup();
                 notify(`Transaction failed,${error.message}`, 'error');
                 console.error("Error in transaction:", error);
             }
         }
-
-        // Reset form and close popup
-        document.getElementById('usdt_send_form').reset();
-        closePopup('send_usdt_popup');
     } catch (error) {
         // Notify and show failed transaction result
         notify(`Error sending USDT transaction: ${error.message}`, 'error');
