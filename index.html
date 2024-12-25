@@ -1671,7 +1671,7 @@
                 await floExchangeAPI.init("exchange")
                 console.log('Exchange API initialized!')
                 floDapps.launchStartUp().then(result => {
-                    console.log(`Welcome ${floDapps.user.id}`);
+                    
                     floGlobals.myFloID = floCrypto.toFloID(floDapps.user.id);
                     floGlobals.myBtcID = btcOperator.convert.legacy2bech(floGlobals.myFloID)
                     getRef('user_profile_id').textContent = floGlobals.myFloID
@@ -1690,8 +1690,6 @@
                         .then(([exchangeSink, convertSink]) => {
                             floGlobals.exchangeSink = exchangeSink
                             floGlobals.convertSink = convertSink
-                            console.log('Exchange sink: ', exchangeSink)
-                            console.log('Convert sink: ', convertSink)
                         }).catch(error => {
                             console.error(error)
                         })
@@ -4650,11 +4648,127 @@ console.log("Receiver inputs:", receiverInputs);
             })
         }
        
-        getRef('usdt_send_transaction').onclick = async (event) => {
+//         getRef('usdt_send_transaction').onclick = async (event) => {
+//     event.preventDefault();
+
+//     try {
+//         // Get transaction inputs
+//         const [senders, privateKey, receivers, amounts] = await getUsdtTransactionInputs();
+
+//         // Debugging logs
+//         console.log("Senders:", senders);
+//         console.log("Private Key:", privateKey);
+//         console.log("Receivers:", receivers);
+//         console.log("Amounts:", amounts);
+        
+//         // Input validation
+      
+//         if (!privateKey) {
+//             notify('Private key is required to send USDT.', 'error');
+//             console.error("Private key is missing!");
+//             return;
+//         }
+
+//         if (receivers.length === 0 || amounts.length === 0) {
+//             notify('Please provide at least one valid receiver address and amount.', 'error');
+//             console.error("Receivers or amounts are empty:", { receivers, amounts });
+//             return;
+//         }
+
+//         for (let i = 0; i < receivers.length; i++) {
+//             console.log(`Validating receiver ${i + 1}: ${receivers[i]} with amount: ${amounts[i]}`);
+//             if (!ethers.utils.isAddress(receivers[i])) {
+//                 notify(`Invalid Ethereum address for receiver ${i + 1}: ${receivers[i]}`, 'error');
+//                 console.error(`Invalid Ethereum address detected: ${receivers[i]}`);
+//                 return;
+//             }
+//             if (isNaN(amounts[i]) || amounts[i] <= 0) {
+//                 notify(`Invalid amount for receiver ${i + 1}: ${amounts[i]}`, 'error');
+//                 console.error(`Invalid amount detected for receiver ${i + 1}: ${amounts[i]}`);
+//                 return;
+//             }
+//         }
+//         const confirmation = await getConfirmation('Send USDT', {
+//             message: `You are about to send the following USDT transactions:\n${receivers
+//                 .map((receiver, i) => `${amounts[i]} USDT to ${receiver}`)
+//                 .join('\n')}`,
+//             confirmText: 'Send',
+//         });
+//         if (!confirmation) return;
+
+//         // Validate private key format
+//         if (!/^[0-9a-fA-F]{64}$/.test(privateKey)) {
+//             let privKeys = coinjs.wif2privkey(privateKey);
+//             if (privKeys && privKeys.privkey) {
+//                 privateKey = privKeys.privkey;
+//                 console.log("Converted private key:", privateKey);
+//             } else {
+//                 notify("Invalid private key format.", "error");
+//                 console.error("Private key conversion failed:", privKeys);
+//                 return;
+//             }
+//         }
+//        // showTransactionResult('failed', { description: "Failed " });
+//         // Show loader on the button
+//         buttonLoader('usdt_send_transaction', true);
+
+//         // Execute transactions for each receiver
+//         for (let i = 0; i < receivers.length; i++) {
+//             console.log(`Sending ${amounts[i]} USDT to ${receivers[i]}...`);
+
+//             let tx;
+//             try {
+//                 // Send token transaction
+//                 tx = await ethOperator.sendToken({
+//                     privateKey,
+//                     receiver: receivers[i],
+//                     amount: amounts[i].toString(),
+//                     token: 'usdt',
+//                 });
+
+//                 if (!tx || !tx.hash) {
+//                     throw new Error('Transaction failed or tx.hash is undefined');
+//                 }
+
+//                 console.log(`Transaction hash for receiver ${i + 1}:`, tx.hash);
+
+//                 // Show transaction as pending
+//                 console.log("Transaction Pending")
+//                 showTransactionResult('pending', { txHash: tx.hash });
+//                 // Wait for confirmation
+//                 await tx.wait();
+
+//                 // Show transaction as confirmed
+//                 showTransactionResult('confirmed', { txHash: tx.hash });
+//                 console.log("Transaction Successful")
+//             } catch (error) {
+//                // notify(`${error.message}`, 'error');
+//                 showTransactionResult('failed', { description: "Failed " });
+//             }
+//         }
+      
+
+//         // Reset form and close popup
+//         document.getElementById('usdt_send_form').reset();
+//         closePopup('send_usdt_popup');
+//     } catch (error) {
+//        // notify(`Error sending USDT transaction: ${error.message}`, 'error');
+//         console.error('Error sending USDT transaction:', error);
+
+//         // Show failed transaction result
+//         showTransactionResult('failed', { description: error.message });
+//     } finally {
+//         // Reset button loader
+//         buttonLoader('usdt_send_transaction', false);
+//     }
+// };
+
+getRef('usdt_send_transaction').onclick = async (event) => {
     event.preventDefault();
 
     try {
         // Get transaction inputs
+        
         const [senders, privateKey, receivers, amounts] = await getUsdtTransactionInputs();
 
         // Debugging logs
@@ -4662,9 +4776,8 @@ console.log("Receiver inputs:", receiverInputs);
         console.log("Private Key:", privateKey);
         console.log("Receivers:", receivers);
         console.log("Amounts:", amounts);
-        
+
         // Input validation
-      
         if (!privateKey) {
             notify('Private key is required to send USDT.', 'error');
             console.error("Private key is missing!");
@@ -4690,6 +4803,7 @@ console.log("Receiver inputs:", receiverInputs);
                 return;
             }
         }
+
         const confirmation = await getConfirmation('Send USDT', {
             message: `You are about to send the following USDT transactions:\n${receivers
                 .map((receiver, i) => `${amounts[i]} USDT to ${receiver}`)
@@ -4735,18 +4849,17 @@ console.log("Receiver inputs:", receiverInputs);
                 console.log(`Transaction hash for receiver ${i + 1}:`, tx.hash);
 
                 // Show transaction as pending
-                showTransactionResult('pending', { txHash: tx.hash });
-                console.log("Transaction Pending")
-                // Wait for confirmation
+                getRef('txid').value = tx.hash; // Set transaction hash
+                openPopup('txid_popup'); // Open the popup to show the transaction hash
                 await tx.wait();
 
-                // Show transaction as confirmed
-                showTransactionResult('confirmed', { txHash: tx.hash });
-                console.log("Transaction Successful")
+                // Notify transaction success
+                notify(`Transaction ${tx.hash} confirmed!`, 'success');
+                console.log("Transaction Successful");
             } catch (error) {
-                cosole.log("failed")
-                notify(`${error.message}`, 'error');
-                showTransactionResult('failed', { description: "Failed " });
+                // Notify and show failed transaction result
+                notify('Transaction failed', error.message, 'error');
+                console.error("Error in transaction:", error);
             }
         }
 
@@ -4754,11 +4867,9 @@ console.log("Receiver inputs:", receiverInputs);
         document.getElementById('usdt_send_form').reset();
         closePopup('send_usdt_popup');
     } catch (error) {
-       // notify(`Error sending USDT transaction: ${error.message}`, 'error');
+        // Notify and show failed transaction result
+        notify(`Error sending USDT transaction: ${error.message}`, 'error');
         console.error('Error sending USDT transaction:', error);
-
-        // Show failed transaction result
-        showTransactionResult('failed', { description: error.message });
     } finally {
         // Reset button loader
         buttonLoader('usdt_send_transaction', false);
@@ -4768,6 +4879,8 @@ console.log("Receiver inputs:", receiverInputs);
 
 
         function showTransactionResult(status, { txHash, description = '' }) {
+
+            console.log("Inside showTransactionResult");
             console.log("Transaction Data:", { txHash, description });
 
             switch (status) {

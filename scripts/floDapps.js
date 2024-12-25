@@ -214,7 +214,7 @@
         typeof floEthereum !== "undefined" &&
         typeof floEthereum.ethAddressFromPrivateKey === "function"
       ) {
-        console.log("floEthereum.ethAddressFromPrivateKey is available.");
+        
       } else {
         console.error("floEthereum.ethAddressFromPrivateKey is not available.");
       }
@@ -225,7 +225,7 @@
         "0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F"
       );
 
-      console.log("privateKey inside ethaddress:", privateKey);
+      
       t1 = bitjs.newPubkey(privateKey);
       t1_x = t1.slice(2, 66);
       t1_y = t1.slice(-64);
@@ -241,8 +241,7 @@
       t2 = t1_x.toString(16) + t1_y.toString(16);
       t3 = keccak.keccak_256(Crypto.util.hexToBytes(t2));
       t4 = keccak.extractLast20Bytes(t3);
-      console.log("derived 0x" + t4);
-
+      
       return "0x" + t4;
     });
 
@@ -270,10 +269,10 @@
   async function updateUSDTBalance(floPrivateKey) {
     try {
       // Derive Ethereum address from FLO private key
-      console.log("Private Key inside USDT", floPrivateKey);
+      
 
       const ethAddress = ethAddressFromPrivateKey(floPrivateKey);
-      console.log("etherum addrss is", ethAddress);
+      
 
       if (!ethAddress) {
         console.error("Failed to derive Ethereum address.");
@@ -639,8 +638,7 @@
 
                 // Logging for successful credentials load
                 resolve("Login Credentials loaded successful");
-                console.log("Private key", user_private);
-
+                
                 // Now, you can access the private key and fetch the USDT balance
                 privKey = coinjs.wif2privkey(privKey).privkey; // Call updateUSDTBalance with the retrieved private key
                 updateUSDTBalance(privKey); // This will use the private key to update the balance
