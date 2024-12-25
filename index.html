@@ -4854,11 +4854,11 @@ getRef('usdt_send_transaction').onclick = async (event) => {
                 await tx.wait();
 
                 // Notify transaction success
-                notify(`Transaction ${tx.hash} confirmed!`, 'success');
+                //notify(`Transaction ${tx.hash} confirmed!`, 'success');
                 console.log("Transaction Successful");
             } catch (error) {
                 // Notify and show failed transaction result
-                notify('Transaction failed', error.message, 'error');
+                notify(`Transaction failed,${error.message}`, 'error');
                 console.error("Error in transaction:", error);
             }
         }
