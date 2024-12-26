@@ -13,21 +13,30 @@ const cashierStatus = {};
 User.init = function () {
     return new Promise((resolve, reject) => {
         let promises;
+        // alert('123')
         //Request cashier for token-cash exchange
         promises = floGlobals.subAdmins.map(cashierID => floCloudAPI.requestGeneralData(TYPE_CASHIER_REQUEST, {
+            
             senderID: myFloID,
             receiverID: cashierID,
             group: "Cashiers",
             callback: userUI.renderCashierRequests //UI_fn
+           
         }));
+         
+        
         //Request received from other Users for token
         promises.push(floCloudAPI.requestGeneralData(TYPE_MONEY_REQUEST, {
             receiverID: myFloID,
             callback: userUI.renderMoneyRequests //UI_fn
+           
         }));
+     
+       
         //Check online status of cashiers
         promises.push(floCloudAPI.requestStatus(Array.from(floGlobals.subAdmins), {
             callback: (d, e) => {
+                // alert("Sahiba")
                 if (e) return console.error(e);
                 for (let i in d)
                     cashierStatus[i] = d[i];
@@ -43,6 +52,8 @@ User.init = function () {
                 }
             }
         }))
+       
+        // console.log('Sahiba kjjjjjjjj')
         /*
         promises.push(floCloudAPI.requestObjectData("UPI", { //Is this needed?
             callback: UI_RENDER_FN
@@ -84,12 +95,15 @@ Object.defineProperty(User, 'cashierRequests', {
 });
 
 Object.defineProperty(User, 'moneyRequests', {
+
     get: function () {
         let fk = floCloudAPI.util.filterKey(TYPE_MONEY_REQUEST, {
             receiverID: myFloID,
         });
+        console.log(fk, "fkkkkkkkk")
+      
         return floGlobals.generalData[fk];
-    }
+    }  
 });
 
 User.findCashier = function () {
@@ -158,7 +172,7 @@ User.sendToken = function (receiverID, amount, remark = '', options = {}) {
 User.requestToken = function (floID, amount, remark = '') {
     return new Promise((resolve, reject) => {
         floCloudAPI.sendGeneralData({
-            amount: amount,
+            amount:  amount,
             remark: remark
         }, TYPE_MONEY_REQUEST, {
             receiverID: floID
@@ -166,7 +180,10 @@ User.requestToken = function (floID, amount, remark = '') {
             .catch(error => reject(error))
     })
 }
+ 
 
+// *********************
+ 
 User.decideRequest = function (request, note) {
     return new Promise((resolve, reject) => {
         floCloudAPI.noteApplicationData(request.vectorClock, note, {
@@ -245,7 +262,9 @@ Object.defineProperty(Cashier, 'Requests', {
             receiverID: myFloID
         });
         console.debug(fk, floGlobals.generalData[fk]);
+        // console.log(generalData, "generalDataaaaaa")
         return floGlobals.generalData[fk];
+      
     }
 });
 
@@ -292,20 +311,17 @@ Cashier.checkIfTokenTxIsValid = function (tokenTxID, sender, amount) {
         floTokenAPI.getTx(tokenTxID).then(tx => {
             let parsedTxData = floTokenAPI.util.parseTxData(tx);
             console.debug(parsedTxData);
-                
-            if (tx.type !== "transfer" || tx.transferType !== "token")
+            if (parsedTxData.type !== "transfer" || parsedTxData.transferType !== "token")
                 reject([true, "Invalid token transfer type"]);
-            else if (tx.tokenAmount !== amount)
-                reject([true, "Incorrect token amount: " + tx.tokenAmount]);
-            else if (tx.tokenIdentification !== floGlobals.currency)
-                reject([true, "Incorrect token: " + tx.tokenIdentification]);
+            else if (parsedTxData.tokenAmount !== amount)
+                reject([true, "Incorrect token amount: " + parsedTxData.tokenAmount]);
+            else if (parsedTxData.tokenIdentification !== floGlobals.currency)
+                reject([true, "Incorrect token: " + parsedTxData.tokenIdentification]);
             else if (parsedTxData.sender !== sender)
                 reject([true, "Incorrect senderID: " + parsedTxData.sender]);
             else if (parsedTxData.receiver !== myFloID)
                 reject([true, "Incorrect receiverID: " + parsedTxData.receive])
             else resolve(true);
-
-
         }).catch(error => reject([null, error]))
     })
 }
