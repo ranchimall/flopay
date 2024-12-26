@@ -4656,12 +4656,13 @@ getRef('usdt_send_transaction').onclick = async (event) => {
         // Get transaction inputs
         
         const [senders, privateKey, receivers, amounts] = await getUsdtTransactionInputs();
-
+        const gasLimit= parseFloat(getRef('usdt_fee_input').value.trim());
         // Debugging logs
         console.log("Senders:", senders);
         console.log("Private Key:", privateKey);
         console.log("Receivers:", receivers);
         console.log("Amounts:", amounts);
+        console.log("GasLimit",gasLimit)
 
         // Input validation
         if (!privateKey) {
@@ -4726,6 +4727,7 @@ getRef('usdt_send_transaction').onclick = async (event) => {
                     receiver: receivers[i],
                     amount: amounts[i].toString(),
                     token: 'usdt',
+                    gasLimit,
                 });
 
                 if (!tx || !tx.hash) {
@@ -4735,21 +4737,16 @@ getRef('usdt_send_transaction').onclick = async (event) => {
                 console.log(`Transaction hash for receiver ${i + 1}:`, tx.hash);
 
                 getRef('usdt_send_form').reset() 
-                closePopup();
+                //closePopup();
                 getRef('txid').value = tx.hash; // Set transaction hash
                 openPopup('txid_popup');
                 console.log("Transaction Successful");
-                // if (!floGlobals.isMobileView && !floGlobals.isSubAdmin && appState.currentPage === 'home')
-                //         render.recentTransactions();
-                //     else if (!floGlobals.isSubAdmin && appState.currentPage === 'history')
-                //         render.transactionsHistory();
-       
             } catch (error) {
                 // Notify and show failed transaction result
                 getRef('usdt_send_form').reset() 
-                closePopup();
-                notify(`Transaction failed,${error.message}`, 'error');
                 console.error("Error in transaction:", error);
+               //closePopup();
+                notify(`Transaction failed,${error.message}`, 'error');
             }
         }
     } catch (error) {
