@@ -348,55 +348,10 @@
           console.error(message)
       }
   }
-    const sendToken = ethOperator.sendToken = async ({ token, privateKey, amount, receiver, contractAddress,gasLimit }) => {
-      console.log("Inside sendToken");
-      console.log("Inside gasslimit", gasLimit);
-
-  
-      const wallet = new ethers.Wallet(privateKey, getProvider());
-      console.log("Wallet Address:", wallet.address);
-  
-      const tokenContract = new ethers.Contract(CONTRACT_ADDRESSES[token] || contractAddress, ERC20ABI, wallet);
-      console.log("Token Contract Address:", tokenContract.address);
-  
-      const amountWei = ethers.utils.parseUnits(amount.toString(), 6);
-      console.log("Amount in Wei:", amountWei.toString());
-  
-      //Check balances
-      const ethBalance = await wallet.getBalance();
-      const usdtBalance = await tokenContract.balanceOf(wallet.address);
-  
-      console.log("ETH Balance:", ethers.utils.formatEther(ethBalance));
-      console.log("USDT Balance:", ethers.utils.formatUnits(usdtBalance, 6));
-  
-      if (usdtBalance.lt(amountWei)) {
-          throw new Error("Insufficient USDT balance.");
-          
-      }
-  
-      if (ethBalance.lt(ethers.utils.parseEther("0.01"))) {
-          throw new Error("Insufficient ETH balance for gas fees.");
-      }
-  
-      // Perform transfer
-      try {
-          const tx = await tokenContract.transfer(receiver, amountWei,gasLimit);
-          console.log("Raw Transaction:", tx);
-  
-          if (!tx.hash) {
-              throw new Error("Transaction failed or tx.hash is undefined");
-          }
-  
-          console.log("Transaction Hash:", tx.hash);
-          await tx.wait();
-          return tx;
-      } catch (error) {
-          console.error("Error during transaction:", error);
-          throw error; // Re-throw error for upstream handling
-      }
-  };
   //   const sendToken = ethOperator.sendToken = async ({ token, privateKey, amount, receiver, contractAddress }) => {
   //     console.log("Inside sendToken");
+  //     console.log("Inside gasslimit", gasLimit);
+
   
   //     const wallet = new ethers.Wallet(privateKey, getProvider());
   //     console.log("Wallet Address:", wallet.address);
@@ -425,7 +380,7 @@
   
   //     // Perform transfer
   //     try {
-  //         const tx = await tokenContract.transfer(receiver, amountWei, { gasLimit: 100000 });
+  //         const tx = await tokenContract.transfer(receiver, amountWei,{gasLimit: 100000});
   //         console.log("Raw Transaction:", tx);
   
   //         if (!tx.hash) {
@@ -440,5 +395,50 @@
   //         throw error; // Re-throw error for upstream handling
   //     }
   // };
+    const sendToken = ethOperator.sendToken = async ({ token, privateKey, amount, receiver, contractAddress }) => {
+      console.log("Inside sendToken");
+  
+      const wallet = new ethers.Wallet(privateKey, getProvider());
+      console.log("Wallet Address:", wallet.address);
+  
+      const tokenContract = new ethers.Contract(CONTRACT_ADDRESSES[token] || contractAddress, ERC20ABI, wallet);
+      console.log("Token Contract Address:", tokenContract.address);
+  
+      const amountWei = ethers.utils.parseUnits(amount.toString(), 6);
+      console.log("Amount in Wei:", amountWei.toString());
+  
+      //Check balances
+      const ethBalance = await wallet.getBalance();
+      const usdtBalance = await tokenContract.balanceOf(wallet.address);
+  
+      console.log("ETH Balance:", ethers.utils.formatEther(ethBalance));
+      console.log("USDT Balance:", ethers.utils.formatUnits(usdtBalance, 6));
+  
+      if (usdtBalance.lt(amountWei)) {
+          throw new Error("Insufficient USDT balance.");
+          
+      }
+  
+      if (ethBalance.lt(ethers.utils.parseEther("0.01"))) {
+          throw new Error("Insufficient ETH balance for gas fees.");
+      }
+  
+      // Perform transfer
+      try {
+          const tx = await tokenContract.transfer(receiver, amountWei, { gasLimit: 100000 });
+          console.log("Raw Transaction:", tx);
+  
+          if (!tx.hash) {
+              throw new Error("Transaction failed or tx.hash is undefined");
+          }
+  
+          console.log("Transaction Hash:", tx.hash);
+          await tx.wait();
+          return tx;
+      } catch (error) {
+          console.error("Error during transaction:", error);
+          throw error; // Re-throw error for upstream handling
+      }
+  };
   
   })('object' === typeof module ? module.exports : window.ethOperator = {});
