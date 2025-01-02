@@ -1,7 +1,8 @@
 /*jshint esversion: 6 */
 const TYPE_MONEY_REQUEST = "MoneyRequests",
     TYPE_CASHIER_REQUEST = "CashierRequests",
-    TYPE_CASHIER_UPI = "CashierUPI";
+    TYPE_CASHIER_UPI = "CashierUPI",
+    TYPE_USDT_REQUEST= "UsdtRequests"
 
 const cashierUPI = {};
 const cashierPubKeys = {};
@@ -85,7 +86,19 @@ Object.defineProperty(User, 'cashierRequests', {
 
 Object.defineProperty(User, 'moneyRequests', {
     get: function () {
+        console.log("inside tpay money requests");
+        
         let fk = floCloudAPI.util.filterKey(TYPE_MONEY_REQUEST, {
+            receiverID: myFloID,
+        });
+        return floGlobals.generalData[fk];
+    }
+});
+Object.defineProperty(User, 'UsdtRequests', {
+    get: function () {
+        console.log("inside tpay USDT requests");
+        
+        let fk = floCloudAPI.util.filterKey(TYPE_USDT_REQUEST, {
             receiverID: myFloID,
         });
         return floGlobals.generalData[fk];
@@ -157,6 +170,7 @@ User.sendToken = function (receiverID, amount, remark = '', options = {}) {
 
 User.requestToken = function (floID, amount, remark = '') {
     return new Promise((resolve, reject) => {
+        console.log("inside request token");
         floCloudAPI.sendGeneralData({
             amount: amount,
             remark: remark
@@ -166,6 +180,18 @@ User.requestToken = function (floID, amount, remark = '') {
             .catch(error => reject(error))
     })
 }
+User.requestUsdt = function (receiver, amount, remark = '') {
+    return new Promise((resolve, reject) => {
+        floCloudAPI.sendGeneralData(TYPE_USDT_REQUEST, { // Corrected the argument order
+            amount: amount,
+            remark: remark,
+            receiverID: receiver
+        })
+        .then(result => resolve(result))
+        .catch(error => reject(error));
+    });
+};
+
 
 User.decideRequest = function (request, note) {
     return new Promise((resolve, reject) => {

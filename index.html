@@ -458,7 +458,7 @@
                             </svg>
                             Send USDT
                         </button>
-                        <button class="wallet-action" onclick="showTokenTransfer('request')">
+                        <button class="wallet-action" onclick="displayUsdtRequestPopup()">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24"
                                 width="24px" fill="#000000">
                                 <path d="M0 0h24v24H0V0z" fill="none" />
@@ -875,6 +875,46 @@
                     placeholder="Add a message" animate></sm-input>
                 <div class="multi-state-button">
                     <button id="token_transfer__button" class="button button--primary cta" onclick="executeUserAction()"
+                        type="submit">Send</button>
+                </div>
+            </sm-form>
+        </section>
+    </sm-popup>
+    <sm-popup id="usdt_request_popup">
+        <header slot="header" class="popup__header">
+            <button class="popup__header__close justify-self-start">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"
+                    fill="#000000">
+                    <path d="M0 0h24v24H0V0z" fill="none" />
+                    <path
+                        d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+                </svg>
+            </button>
+            <h3 id="usdt_request_title"></h3>
+        </header>
+        <section class="grid gap-2">
+            <sm-form>
+                <sm-input id="usdt_request_receiver" placeholder="ETH Address" error-text="Invalid ETH address"
+                data-eth-address animate required autofocus>
+                    <button slot="right" class="icon-only" onclick="openPopup('saved_ids_popup')"
+                        title="Select from saved IDs">
+                        <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24"
+                            width="24px" fill="#000000">
+                            <path d="M0 0h24v24H0z" fill="none" />
+                            <path
+                                d="M21 5v14h2V5h-2zm-4 14h2V5h-2v14zM14 5H2c-.55 0-1 .45-1 1v12c0 .55.45 1 1 1h12c.55 0 1-.45 1-1V6c0-.55-.45-1-1-1zM8 7.75c1.24 0 2.25 1.01 2.25 2.25S9.24 12.25 8 12.25 5.75 11.24 5.75 10 6.76 7.75 8 7.75zM12.5 17h-9v-.75c0-1.5 3-2.25 4.5-2.25s4.5.75 4.5 2.25V17z" />
+                        </svg>
+                    </button>
+                </sm-input>
+                <sm-input id="usdt_request_amount" type="number" placeholder="0" required min="1" step="0.01">
+                    <div class="currency-symbol flex" slot="icon">
+                                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 339.43 295.27"><title>tether-usdt-logo</title><path d="M62.15,1.45l-61.89,130a2.52,2.52,0,0,0,.54,2.94L167.95,294.56a2.55,2.55,0,0,0,3.53,0L338.63,134.4a2.52,2.52,0,0,0,.54-2.94l-61.89-130A2.5,2.5,0,0,0,275,0H64.45a2.5,2.5,0,0,0-2.3,1.45h0Z" style="fill:#50af95;fill-rule:evenodd"></path><path d="M191.19,144.8v0c-1.2.09-7.4,0.46-21.23,0.46-11,0-18.81-.33-21.55-0.46v0c-42.51-1.87-74.24-9.27-74.24-18.13s31.73-16.25,74.24-18.15v28.91c2.78,0.2,10.74.67,21.74,0.67,13.2,0,19.81-.55,21-0.66v-28.9c42.42,1.89,74.08,9.29,74.08,18.13s-31.65,16.24-74.08,18.12h0Zm0-39.25V79.68h59.2V40.23H89.21V79.68H148.4v25.86c-48.11,2.21-84.29,11.74-84.29,23.16s36.18,20.94,84.29,23.16v82.9h42.78V151.83c48-2.21,84.12-11.73,84.12-23.14s-36.09-20.93-84.12-23.15h0Zm0,0h0Z" style="fill:#fff;fill-rule:evenodd"></path></svg>
+                                </div>
+                </sm-input>
+                <sm-input id="usdt_request__remark" pattern="[A-Za-z]" error-text="Only text allowed"
+                    placeholder="Add a message" animate></sm-input>
+                <div class="multi-state-button">
+                    <button id="usdt_request__button" class="button button--primary cta" onclick="executeUsdtAction()"
                         type="submit">Send</button>
                 </div>
             </sm-form>
@@ -4276,6 +4316,31 @@ async function sendTransaction() {
                 }
             })
         }
+        userUI.requestUsdtFromUser = function (receiver, amount, remark) {
+    getConfirmation('Confirm', {
+        message: `Do you want to request ${amount} USDT from ${receiver}?`,
+        confirmText: 'Request',
+    }).then(confirmation => {
+        if (confirmation) {
+            buttonLoader('token_transfer__button', true); // Show loader on the button
+
+            User.requestUsdt(receiver, amount, remark).then(result => {
+                    console.log("inside request token")
+                    console.log(`Requested ${amount} USDT from ${receiver}`, result);
+                    notify(`Requested ${amount} USDT from ${receiver}`, 'success');
+                    closePopup(); // Close the request popup
+                })
+                .catch(error => {
+                    console.error('Error requesting USDT:', error);
+                    notify(error.message || 'Failed to request USDT. Please try again.', 'error');
+                })
+                .finally(() => {
+                    buttonLoader('token_transfer__button', false); // Remove loader from the button
+                });
+        }
+    });
+};
+
         function executeUserAction() {
             const floID = getRef('token_transfer__receiver').value.trim(),
                 amount = parseFloat(getRef('token_transfer__amount').value),
@@ -4286,6 +4351,51 @@ async function sendTransaction() {
                 userUI.requestMoneyFromUser(floID, amount, remark);
             }
         }
+
+        function executeUsdtAction() {
+    const receiver = getRef('usdt_request_receiver').value.trim(),
+        amount = parseFloat(getRef('usdt_request_amount').value),
+        remark = getRef('usdt_request__remark').value.trim();
+        userUI.requestUsdtFromUser(receiver, amount, remark);
+}
+
+        function displayUsdtRequestPopup() {
+    // Set the popup title and button text
+    getRef('usdt_request_title').textContent = 'Request USDT';
+    getRef('usdt_request__button').textContent = 'Request';
+    currentUserAction = 'request';
+
+    // Handle receiver field based on navigation state
+    if (appState.lastPage === 'contact') {
+        // Prefill receiver address and make it read-only
+        getRef('usdt_request_receiver').value = appState.params.floId;
+        getRef('usdt_request_receiver').readOnly = true;
+
+        // Hide the saved IDs button
+        getRef('usdt_request_receiver')
+            .querySelector('button')
+            .classList.add('hidden');
+    } else {
+        // Allow editing receiver address
+        getRef('usdt_request_receiver').readOnly = false;
+
+        // Show the saved IDs button
+        getRef('usdt_request_receiver')
+            .querySelector('button')
+            .classList.remove('hidden');
+    }
+
+    // Clear the amount and remark fields
+    getRef('usdt_request_amount').value = '';
+    getRef('usdt_request__remark').value = '';
+
+    // Open the popup
+    openPopup('usdt_request_popup');
+
+    // Focus on the amount input field
+    getRef('usdt_request_amount').focus();
+}
+
 
         function toggleFilters() {
             if (getRef('history_applied_filters').classList.contains('hidden') && getRef('history_applied_filters').children.length > 0) {
@@ -4547,8 +4657,7 @@ console.log("Receiver inputs:", receiverInputs);
         const receivers = [...getRef('usdt_receiver_container').querySelectorAll('[data-eth-address]')].filter(input => input.value.trim() !== '').map(input => input.value.trim());
         console.log('Receivers:', receivers); 
         const amounts = [...getRef('usdt_receiver_container').querySelectorAll('.receiver-amount')].filter(input => input.value.trim() !== '').map(input => input.value.trim());
-        const fees=getRef('usdt_fee_input').value;
-        return [senders, privKeys, receivers, amounts,fees];
+        return [senders, privKeys, receivers, amounts];
     } catch (error) {
         console.error("Error getting transaction inputs:", error);
         return [];
@@ -4650,13 +4759,122 @@ console.log("Receiver inputs:", receiverInputs);
             })
         }
 
+getRef('usdt_send_transaction').onclick = async (event) => {
+    event.preventDefault();
+
+    try {
+        // Get transaction inputs
+        
+        const [senders, privateKey, receivers, amounts] = await getUsdtTransactionInputs();
+        // Debugging logs
+        console.log("Senders:", senders);
+        console.log("Private Key:", privateKey);
+        console.log("Receivers:", receivers);
+        console.log("Amounts:", amounts);
+       
+
+        // Input validation
+        if (!privateKey) {
+            notify('Private key is required to send USDT.', 'error');
+            console.error("Private key is missing!");
+            return;
+        }
+
+        if (receivers.length === 0 || amounts.length === 0) {
+            notify('Please provide at least one valid receiver address and amount.', 'error');
+            console.error("Receivers or amounts are empty:", { receivers, amounts });
+            return;
+        }
+
+        for (let i = 0; i < receivers.length; i++) {
+            console.log(`Validating receiver ${i + 1}: ${receivers[i]} with amount: ${amounts[i]}`);
+            if (!ethers.utils.isAddress(receivers[i])) {
+                notify(`Invalid Ethereum address for receiver ${i + 1}: ${receivers[i]}`, 'error');
+                console.error(`Invalid Ethereum address detected: ${receivers[i]}`);
+                return;
+            }
+            if (isNaN(amounts[i]) || amounts[i] <= 0) {
+                notify(`Invalid amount for receiver ${i + 1}: ${amounts[i]}`, 'error');
+                console.error(`Invalid amount detected for receiver ${i + 1}: ${amounts[i]}`);
+                return;
+            }
+        }
+
+        const confirmation = await getConfirmation('Send USDT', {
+            message: `You are about to send the following USDT transactions:\n${receivers
+                .map((receiver, i) => `${amounts[i]} USDT to ${receiver}`)
+                .join('\n')}`,
+            confirmText: 'Send',
+        });
+        if (!confirmation) return;
+
+        // Validate private key format
+        if (!/^[0-9a-fA-F]{64}$/.test(privateKey)) {
+            let privKeys = coinjs.wif2privkey(privateKey);
+            if (privKeys && privKeys.privkey) {
+                privateKey = privKeys.privkey;
+                console.log("Converted private key:", privateKey);
+            } else {
+                notify("Invalid private key format.", "error");
+                console.error("Private key conversion failed:", privKeys);
+                return;
+            }
+        }
+
+        // Show loader on the button
+        buttonLoader('usdt_send_transaction', true);
+
+        // Execute transactions for each receiver
+        for (let i = 0; i < receivers.length; i++) {
+            console.log(`Sending ${amounts[i]} USDT to ${receivers[i]}...`);
+
+            let tx;
+            try {
+                // Send token transaction
+                tx = await ethOperator.sendToken({
+                    privateKey,
+                    receiver: receivers[i],
+                    amount: amounts[i].toString(),
+                    token: 'usdt',
+                    
+                });
+
+                if (!tx || !tx.hash) {
+                    throw new Error('Transaction failed or tx.hash is undefined');
+                }
+
+                console.log(`Transaction hash for receiver ${i + 1}:`, tx.hash);
+
+                getRef('usdt_send_form').reset() 
+                //closePopup();
+                getRef('txid').value = tx.hash; // Set transaction hash
+                openPopup('txid_popup');
+                console.log("Transaction Successful");
+            } catch (error) {
+                // Notify and show failed transaction result
+                getRef('usdt_send_form').reset() 
+                console.error("Error in transaction:", error);
+               //closePopup();
+                notify(`Transaction failed,${error.message}`, 'error');
+            }
+        }
+    } catch (error) {
+        // Notify and show failed transaction result
+        getRef('usdt_send_form').reset()
+        notify(`Error sending USDT transaction: ${error.message}`, 'error');
+        console.error('Error sending USDT transaction:', error);
+    } finally {
+        // Reset button loader
+        buttonLoader('usdt_send_transaction', false);
+    }
+};
 // getRef('usdt_send_transaction').onclick = async (event) => {
 //     event.preventDefault();
 
 //     try {
 //         // Get transaction inputs
-        
-//         const [senders, privateKey, receivers, amounts,fees] = await getUsdtTransactionInputs();
+//         const [senders, privateKey, receivers, amounts, fees] = await getUsdtTransactionInputs();
+
 //         // Debugging logs
 //         console.log("Senders:", senders);
 //         console.log("Private Key:", privateKey);
@@ -4689,11 +4907,12 @@ console.log("Receiver inputs:", receiverInputs);
 //                 console.error(`Invalid amount detected for receiver ${i + 1}: ${amounts[i]}`);
 //                 return;
 //             }
+            
 //         }
 
 //         const confirmation = await getConfirmation('Send USDT', {
 //             message: `You are about to send the following USDT transactions:\n${receivers
-//                 .map((receiver, i) => `${amounts[i]} USDT to ${receiver}`)
+//                 .map((receiver, i) => `${amounts[i]} USDT to ${receiver} with a fee of ${fees}`)
 //                 .join('\n')}`,
 //             confirmText: 'Send',
 //         });
@@ -4717,7 +4936,7 @@ console.log("Receiver inputs:", receiverInputs);
 
 //         // Execute transactions for each receiver
 //         for (let i = 0; i < receivers.length; i++) {
-//             console.log(`Sending ${amounts[i]} USDT to ${receivers[i]}...`);
+//             console.log(`Sending ${amounts[i]} USDT to ${receivers[i]} with fee ${fees[i]}...`);
 
 //             let tx;
 //             try {
@@ -4727,7 +4946,7 @@ console.log("Receiver inputs:", receiverInputs);
 //                     receiver: receivers[i],
 //                     amount: amounts[i].toString(),
 //                     token: 'usdt',
-                    
+//                     fees: fees[i].toString(), // Pass the fee if `sendToken` supports it
 //                 });
 
 //                 if (!tx || !tx.hash) {
@@ -4736,136 +4955,28 @@ console.log("Receiver inputs:", receiverInputs);
 
 //                 console.log(`Transaction hash for receiver ${i + 1}:`, tx.hash);
 
-//                 getRef('usdt_send_form').reset() 
-//                 //closePopup();
+//                 getRef('usdt_send_form').reset();
 //                 getRef('txid').value = tx.hash; // Set transaction hash
 //                 openPopup('txid_popup');
 //                 console.log("Transaction Successful");
 //             } catch (error) {
 //                 // Notify and show failed transaction result
-//                 getRef('usdt_send_form').reset() 
 //                 console.error("Error in transaction:", error);
-//                //closePopup();
-//                 notify(`Transaction failed,${error.message}`, 'error');
+//                 getRef('usdt_send_form').reset();
+//                // notify(`Transaction failed,${error.message}`, 'error');
 //             }
 //         }
 //     } catch (error) {
-//         // Notify and show failed transaction result
-//         //getRef('usdt_send_form').reset()
+        
+//         getRef('usdt_send_form').reset();// Notify and show failed transaction result
 //         notify(`Error sending USDT transaction: ${error.message}`, 'error');
 //         console.error('Error sending USDT transaction:', error);
+
 //     } finally {
 //         // Reset button loader
 //         buttonLoader('usdt_send_transaction', false);
 //     }
 // };
-getRef('usdt_send_transaction').onclick = async (event) => {
-    event.preventDefault();
-
-    try {
-        // Get transaction inputs
-        const [senders, privateKey, receivers, amounts, fees] = await getUsdtTransactionInputs();
-
-        // Debugging logs
-        console.log("Senders:", senders);
-        console.log("Private Key:", privateKey);
-        console.log("Receivers:", receivers);
-        console.log("Amounts:", amounts);
-        console.log("Fees:", fees);
-
-        // Input validation
-        if (!privateKey) {
-            notify('Private key is required to send USDT.', 'error');
-            console.error("Private key is missing!");
-            return;
-        }
-
-        if (receivers.length === 0 || amounts.length === 0) {
-            notify('Please provide at least one valid receiver address and amount.', 'error');
-            console.error("Receivers or amounts are empty:", { receivers, amounts });
-            return;
-        }
-
-        for (let i = 0; i < receivers.length; i++) {
-            console.log(`Validating receiver ${i + 1}: ${receivers[i]} with amount: ${amounts[i]}`);
-            if (!ethers.utils.isAddress(receivers[i])) {
-                notify(`Invalid Ethereum address for receiver ${i + 1}: ${receivers[i]}`, 'error');
-                console.error(`Invalid Ethereum address detected: ${receivers[i]}`);
-                return;
-            }
-            if (isNaN(amounts[i]) || amounts[i] <= 0) {
-                notify(`Invalid amount for receiver ${i + 1}: ${amounts[i]}`, 'error');
-                console.error(`Invalid amount detected for receiver ${i + 1}: ${amounts[i]}`);
-                return;
-            }
-            
-        }
-
-        const confirmation = await getConfirmation('Send USDT', {
-            message: `You are about to send the following USDT transactions:\n${receivers
-                .map((receiver, i) => `${amounts[i]} USDT to ${receiver} with a fee of ${fees}`)
-                .join('\n')}`,
-            confirmText: 'Send',
-        });
-        if (!confirmation) return;
-
-        // Validate private key format
-        if (!/^[0-9a-fA-F]{64}$/.test(privateKey)) {
-            let privKeys = coinjs.wif2privkey(privateKey);
-            if (privKeys && privKeys.privkey) {
-                privateKey = privKeys.privkey;
-                console.log("Converted private key:", privateKey);
-            } else {
-                notify("Invalid private key format.", "error");
-                console.error("Private key conversion failed:", privKeys);
-                return;
-            }
-        }
-
-        // Show loader on the button
-        buttonLoader('usdt_send_transaction', true);
-
-        // Execute transactions for each receiver
-        for (let i = 0; i < receivers.length; i++) {
-            console.log(`Sending ${amounts[i]} USDT to ${receivers[i]} with fee ${fees[i]}...`);
-
-            let tx;
-            try {
-                // Send token transaction
-                tx = await ethOperator.sendToken({
-                    privateKey,
-                    receiver: receivers[i],
-                    amount: amounts[i].toString(),
-                    token: 'usdt',
-                    fees: fees[i].toString(), // Pass the fee if `sendToken` supports it
-                });
-
-                if (!tx || !tx.hash) {
-                    throw new Error('Transaction failed or tx.hash is undefined');
-                }
-
-                console.log(`Transaction hash for receiver ${i + 1}:`, tx.hash);
-
-                getRef('usdt_send_form').reset();
-                getRef('txid').value = tx.hash; // Set transaction hash
-                openPopup('txid_popup');
-                console.log("Transaction Successful");
-            } catch (error) {
-                // Notify and show failed transaction result
-                console.error("Error in transaction:", error);
-                getRef('usdt_send_form').reset();
-               // notify(`Transaction failed,${error.message}`, 'error');
-            }
-        }
-    } catch (error) {
-        // Notify and show failed transaction result
-        notify(`Error sending USDT transaction: ${error.message}`, 'error');
-        console.error('Error sending USDT transaction:', error);
-    } finally {
-        // Reset button loader
-        buttonLoader('usdt_send_transaction', false);
-    }
-};
 
 
         function showTransactionResult(status, { txHash, description = '' }) {
