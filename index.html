@@ -1750,6 +1750,7 @@
                     } else {
                         userUI.renderCashierRequests(User.cashierRequests);
                         userUI.renderMoneyRequests(User.moneyRequests);
+                        userUI.renderUsdtRequests(User.usdtRequests);
                         User.init().then(result => {
                             console.log(result);
                             console.log("Cashiers:", cashierUPI);
@@ -3316,6 +3317,52 @@ async function sendTransaction() {
                 removeNotificationBadge('requests_notification_button')
             }
         };
+        userUI.renderUsdtRequests = function (requests, error = null) {
+    if (error) {
+        return console.error(error);
+    } else if (typeof requests !== "object" || requests === null) {
+        return;
+    }
+    // For "requests" page
+    if (appState.currentPage === 'requests') {
+        for (let r in requests) {
+            getRef('payment_request_history').querySelectorAll(`[data-vc="${r}"]`).forEach(card => card.remove());
+            getRef('payment_request_history').prepend(render.paymentRequestCard(requests[r]));
+        }
+    }
+    // For "home" page
+    if (appState.currentPage === 'home') {
+        for (let r in requests) {
+            getRef('pending_payment_requests').querySelectorAll(`[data-vc="${r}"]`).forEach(card => card.remove());
+        }
+    }
+    // Notify user about new requests
+    if (floGlobals.loaded) {
+        for (let r in requests) {
+            if (!requests[r].note) {
+                notify(`You have received a USDT request from ${getEthIdTitle(requests[r].senderID)}`, '', {
+                    action: {
+                        label: 'View',
+                        callback: () => {
+                            window.location.hash = `#/requests`
+                        }
+                    }
+                });
+            }
+        }
+    }
+    // Update notification badge
+    let totalRequests = 0;
+    for (const request in User.usdtRequests) {
+        if (!User.usdtRequests[request].note) totalRequests++;
+    }
+    if (totalRequests) {
+        addNotificationBadge('requests_notification_button', totalRequests);
+    } else {
+        removeNotificationBadge('requests_notification_button');
+    }
+};
+
         const pendingTransactionsObserver = new MutationObserver((mutations) => {
             mutations.forEach(mutation => {
                 if (mutation.type === 'childList') {
@@ -3618,7 +3665,9 @@ async function sendTransaction() {
         function getFloIdTitle(floID) {
             return floGlobals.contacts[floID] || floID;
         }
-
+        function getEthIdTitle(ethID) {
+            return floGlobals.contacts[ethID] || ethID;
+        }
         function formatAmount(amount = 0, currency = 'inr') {
             if (!amount)
                 return '0';
@@ -4325,7 +4374,7 @@ async function sendTransaction() {
             buttonLoader('token_transfer__button', true); // Show loader on the button
 
             User.requestUsdt(receiver, amount, remark).then(result => {
-                    console.log("inside request token")
+                    console.log("inside request usdt token")
                     console.log(`Requested ${amount} USDT from ${receiver}`, result);
                     notify(`Requested ${amount} USDT from ${receiver}`, 'success');
                     closePopup(); // Close the request popup

@@ -26,6 +26,11 @@ User.init = function () {
             receiverID: myFloID,
             callback: userUI.renderMoneyRequests //UI_fn
         }));
+
+        promises.push(floCloudAPI.requestGeneralData(TYPE_USDT_REQUEST, {
+            receiverID: myFloID,
+            callback: userUI.renderUsdtRequests
+        }))
         //Check online status of cashiers
         promises.push(floCloudAPI.requestStatus(Array.from(floGlobals.subAdmins), {
             callback: (d, e) => {
@@ -94,7 +99,7 @@ Object.defineProperty(User, 'moneyRequests', {
         return floGlobals.generalData[fk];
     }
 });
-Object.defineProperty(User, 'UsdtRequests', {
+Object.defineProperty(User, 'usdtRequests', {
     get: function () {
         console.log("inside tpay USDT requests");
         
@@ -182,13 +187,12 @@ User.requestToken = function (floID, amount, remark = '') {
 }
 User.requestUsdt = function (receiver, amount, remark = '') {
     return new Promise((resolve, reject) => {
-        floCloudAPI.sendGeneralData(TYPE_USDT_REQUEST, { // Corrected the argument order
+        floCloudAPI.sendGeneralData( { // Corrected the argument order
             amount: amount,
             remark: remark,
-            receiverID: receiver
-        })
-        .then(result => resolve(result))
-        .catch(error => reject(error));
+        }, TYPE_USDT_REQUEST, {  
+            receiverID: myFloID
+        }).then(result => resolve(result)).catch(error => reject(error));
     });
 };
 
