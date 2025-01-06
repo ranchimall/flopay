@@ -270,6 +270,16 @@
             .catch(error => reject(error))
     });
 
+
+
+   //  USDT BLOCKCHAIN APIS
+   
+//    *****************************
+ 
+
+//    *****************************
+
+
     const BASE_TX_SIZE = 12,
         BASE_INPUT_SIZE = 41,
         LEGACY_INPUT_SIZE = 107,
@@ -671,6 +681,7 @@
     btcOperator.sendTx = function (senders, privkeys, receivers, amounts, fee = null, options = {}) {
         return new Promise((resolve, reject) => {
             createSignedTx(senders, privkeys, receivers, amounts, fee, options).then(result => {
+                debugger;
                 broadcastTx(result.transaction.serialize())
                     .then(txid => resolve(txid))
                     .catch(error => reject(error));

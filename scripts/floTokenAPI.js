@@ -66,17 +66,49 @@
         });
     }
 
+    // const getBalance = tokenAPI.getBalance = function (floID, token = DEFAULT.currency) {
+    //     return new Promise((resolve, reject) => {
+    //         fetch_api(`api/v2/floAddressInfo/${floID}`).then(result => {
+    //             let token_balance = 0
+    //             if(result.floAddressBalances != null && typeof result.floAddressBalances == "object" && token in result.floAddressBalances){
+    //                 token_balance = result.floAddressBalances[token]["balance"] || 0
+    //             }
+    //             resolve(token_balance)
+    //         }).catch(error => reject(error))
+    //     })
+    // }
+
     const getBalance = tokenAPI.getBalance = function (floID, token = DEFAULT.currency) {
         return new Promise((resolve, reject) => {
-            fetch_api(`api/v2/floAddressInfo/${floID}`).then(result => {
-                let token_balance = 0
-                if(result.floAddressBalances != null && typeof result.floAddressBalances == "object" && token in result.floAddressBalances){
-                    token_balance = result.floAddressBalances[token]["balance"] || 0
+          // Fetch the default currency balance
+          fetch_api(`api/v2/floAddressInfo/${floID}`)
+            .then(result => {
+              let tokenBalance = 0;
+              let usdtBalance = 0;
+      
+              // Check if the result contains token balances
+              if (result.floAddressBalances != null && typeof result.floAddressBalances == "object") {
+                // Get the balance for the default token
+                if (token in result.floAddressBalances) {
+                  tokenBalance = result.floAddressBalances[token]["balance"] || 0;
                 }
-                resolve(token_balance)
-            }).catch(error => reject(error))
-        })
-    }
+      
+                // Get the balance for USDT if available
+                if ("usdt" in result.floAddressBalances) {
+                  usdtBalance = result.floAddressBalances["usdt"]["balance"] || 0;
+                }
+              }
+      
+              // Resolve both balances as an object
+              resolve({
+                [token]: tokenBalance,
+                usdt: usdtBalance
+              });
+            })
+            .catch(error => reject(error));
+        });
+      };
+      
 
     tokenAPI.getTx = function (txID) {
         return new Promise((resolve, reject) => {
@@ -182,15 +214,15 @@
 
     const util = tokenAPI.util = {};
 
-     util.parseTxData = function (txData) {
+    util.parseTxData = function (txData) {
         let parsedData = {};
         for (let p in txData.parsedFloData)
             parsedData[p] = txData.parsedFloData[p];
-        parsedData.sender = txData.vin[0].addresses[0];
-        for (let vout of txData.vout)
+        parsedData.sender = txData.transactionDetails?.vin[0].addr;
+        for (let vout of txData.transactionDetails?.vout ?? [])
             if (vout.scriptPubKey.addresses[0] !== parsedData.sender)
                 parsedData.receiver = vout.scriptPubKey.addresses[0];
-        parsedData.time = txData.time;
+        parsedData.time = txData.transactionDetails?.time??'';
         return parsedData;
     }
 

@@ -309,6 +309,7 @@
     const _liveRequest = {};
 
     function liveRequest(floID, request, callback) {
+    
         const filterData = typeof request.status !== 'undefined' ?
             data => {
                 if (request.status)

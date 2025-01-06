@@ -12,15 +12,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/main.min.css">
-    <script id="floGlobals">
-        /* Constants for FLO blockchain operations !!Make sure to add this at beginning!! */
-        const floGlobals = {
-            blockchain: "FLO",
-            adminID: "FH64hLqB71e6i11rnZZW7hvzoH8daCwy1J",
-            currency: "rupee",
-            application: "blockchainUPI"
-        }
-    </script>
+
     <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.4.6" defer></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"
         integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous" defer></script>
@@ -36,7 +28,38 @@
     <script src="scripts/floTokenAPI.js" defer></script>
     <script src="scripts/floExchangeAPI.js" defer></script>
     <script src="scripts/btcOperator.js" defer></script>
+    <script src="scripts/bscOperator.js" defer></script>
     <script src="scripts/qrcode.min.js" defer></script>
+    <script src="scripts/keccak.js" type="text/javascript"></script>
+    <script src="scripts/floEthereum.js" type="text/javascript"></script>
+
+
+    <script id="floGlobals">
+        /* Constants for FLO blockchain operations !!Make sure to add this at beginning!! */
+        const floGlobals = {
+            blockchain: "FLO",
+            adminID: "FH64hLqB71e6i11rnZZW7hvzoH8daCwy1J",
+            currency: "rupee",
+            application: "blockchainUPI"
+        }
+    </script>
+
+    <!-- ethers.js version 5.6 -->
+
+    <!-- <script src="scripts/btcOperator.js" type="text/javascript"></script>
+      <script src="scripts/floCrypto.js" type="text/javascript"></script>
+      <script src="scripts/tap_combined.js" type="text/javascript"></script>
+      <script src="scripts/keccak.js" type="text/javascript"></script>
+      <script src="scripts/floEthereum.js" type="text/javascript"></script>
+      <script src="scripts/compactIDB.js" type="text/javascript"></script>
+      <script
+        src="scripts/ether.umd.min.js"
+        type="text/javascript"
+      ></script>
+       -->
+    <script src="scripts/ether.umd.min.js" type="text/javascript"></script>
+    <script src="scripts/bscOperator.js" type="text/javascript"></script>
+
 </head>
 
 <body onload="onLoadStartUp()" class="hidden">
@@ -284,9 +307,25 @@
                             <span id="rupee_balance"></span>
                         </div>
                         <div class="flex align-center space-between balance-card">
-                            <span>FLO</span>
+                            <span>FLOs</span>
                             <span id="flo_balance"></span>
                         </div>
+
+                        <div class="flex align-center space-between balance-card">
+                            <span>USDT Ikp</span>
+                            <span id="usdt_balance"></span>
+
+
+
+                        </div>
+
+
+
+
+
+
+
+
                         <div class="flex align-center space-between balance-card">
                             <span>BTC</span>
                             <span id="btc_balance"></span>
@@ -295,7 +334,9 @@
                 </div>
                 <sm-chips id="wallet_section__asset_selector" class="user-element">
                     <sm-chip value="rupee" selected>Rupee</sm-chip>
+                    <sm-chip value="usdt">USDT</sm-chip>
                     <sm-chip value="btc">BTC</sm-chip>
+
                 </sm-chips>
                 <div id="asset_actions_wrapper" class="user-element">
                     <div class="grid gap-1-5">
@@ -332,6 +373,26 @@
                                 </svg>
                                 Withdraw
                             </button>
+
+
+                            <button class="wallet-action" onclick="showTokenTransfer('send')">
+                                <div class="asset-symbol flex" slot="icon">
+                                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" id="Layer_1"
+                                        data-name="Layer 1" viewBox="0 0 339.43 295.27">
+                                        <title>tether-usdt-logo</title>
+                                        <path
+                                            d="M62.15,1.45l-61.89,130a2.52,2.52,0,0,0,.54,2.94L167.95,294.56a2.55,2.55,0,0,0,3.53,0L338.63,134.4a2.52,2.52,0,0,0,.54-2.94l-61.89-130A2.5,2.5,0,0,0,275,0H64.45a2.5,2.5,0,0,0-2.3,1.45h0Z"
+                                            style="fill:#50af95;fill-rule:evenodd"></path>
+                                        <path
+                                            d="M191.19,144.8v0c-1.2.09-7.4,0.46-21.23,0.46-11,0-18.81-.33-21.55-0.46v0c-42.51-1.87-74.24-9.27-74.24-18.13s31.73-16.25,74.24-18.15v28.91c2.78,0.2,10.74.67,21.74,0.67,13.2,0,19.81-.55,21-0.66v-28.9c42.42,1.89,74.08,9.29,74.08,18.13s-31.65,16.24-74.08,18.12h0Zm0-39.25V79.68h59.2V40.23H89.21V79.68H148.4v25.86c-48.11,2.21-84.29,11.74-84.29,23.16s36.18,20.94,84.29,23.16v82.9h42.78V151.83c48-2.21,84.12-11.73,84.12-23.14s-36.09-20.93-84.12-23.15h0Zm0,0h0Z"
+                                            style="fill:#fff;fill-rule:evenodd"></path>
+                                        <script xmlns=""></script>
+                                    </svg>
+                                </div>
+                                Convert to USDT
+                            </button>
+
+
                             <button class="wallet-action" onclick="initConversion('btc')">
                                 <svg class="icon" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24"
                                     height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
@@ -346,7 +407,11 @@
                                 </svg>
                                 Convert to BTC
                             </button>
+
+
                         </div>
+
+
                         <a id="wallet_history_button" class="integrated-action-button flex align-center user-element"
                             href="#/wallet">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24"
@@ -405,14 +470,230 @@
                             </div>
                         </details>
                     </div>
+                    <!-- ***********FOR USDT TAB********** -->
+                    <div class="actions-wrapper  ">
+                        <!-- <button class="wallet-action" onclick="openPopup('send_btc_popup')">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24"
+                                width="24px" fill="#000000">
+                                <path d="M0 0h24v24H0z" fill="none" />
+                                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                            </svg>
+                           Convert to BTC
+                        </button>
+                        <button class="wallet-action" onclick="initConversion('rupee')">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24"
+                                height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
+                                <g>
+                                    <rect fill="none" height="24" width="24" />
+                                </g>
+                                <g>
+                                    <g>
+                                        <path
+                                            d="M13.66,7C13.1,5.82,11.9,5,10.5,5L6,5V3h12v2l-3.26,0c0.48,0.58,0.84,1.26,1.05,2L18,7v2l-2.02,0c-0.25,2.8-2.61,5-5.48,5 H9.77l6.73,7h-2.77L7,14v-2h3.5c1.76,0,3.22-1.3,3.46-3L6,9V7L13.66,7z" />
+                                    </g>
+                                </g>
+                            </svg>
+                            Convert to Rupee
+                        </button>  -->
+
+                    </div>
+
+
+
+
+                </div>
+                <!-- ************************ FOR BTC TAB**************-->
+                <div id="asset_actions_wrapper_1" class="user-element">
+                    <div class="grid gap-1-5">
+                        <div class="actions-wrapper">
+                            <!-- <button class="wallet-action" onclick="showTokenTransfer('send')">
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24"
+                                    width="24px" fill="#000000">
+                                    <path d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                                </svg>
+                                Sendddd
+                            </button>
+                            <button class="wallet-action" onclick="showTokenTransfer('request')">
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24"
+                                    width="24px" fill="#000000">
+                                    <path d="M0 0h24v24H0V0z" fill="none" />
+                                    <path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z" />
+                                </svg>
+                                Request
+                            </button>
+                            <button class="wallet-action" onclick="openPopup('topup_wallet_popup', true)">
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    viewBox="0 0 24 24" fill="none">
+                                    <path
+                                        d="M16.5 13.7619H18.3V16.4762H21V18.2857H18.3V21H16.5V18.2857H13.8V16.4762H16.5V13.7619ZM11.55 2L20.1 6.52381V8.33333H3V6.52381L11.55 2ZM15.6 10.1429H18.3V12.0248L17.4 11.9524C16.77 11.9524 16.167 12.061 15.6 12.26V10.1429ZM3 21V18.2857H12.072C12.243 19.3171 12.711 20.249 13.377 21H3ZM10.2 10.1429H12.9V14.3771C12.486 15.0014 12.198 15.7071 12.072 16.4762H10.2V10.1429ZM4.8 10.1429H7.5V16.4762H4.8V10.1429Z" />
+                                </svg>
+                                Top-up
+                            </button>
+                            <button class="wallet-action" onclick="openPopup('withdraw_wallet_popup')">
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                    viewBox="0 0 24 24" fill="none">
+                                    <path
+                                        d="M13.8 16.4762H21V18.2857H13.8V16.4762ZM11.55 2L20.1 6.52381V8.33333H3V6.52381L11.55 2ZM15.6 10.1429H18.3V12.0248L17.4 11.9524C16.77 11.9524 16.167 12.061 15.6 12.26V10.1429ZM3 21V18.2857H12.072C12.243 19.3171 12.711 20.249 13.377 21H3ZM10.2 10.1429H12.9V14.3771C12.486 15.0014 12.198 15.7071 12.072 16.4762H10.2V10.1429ZM4.8 10.1429H7.5V16.4762H4.8V10.1429Z" />
+                                </svg>
+                                Withdraw
+                            </button> -->
+
+
+
+
+
+                            <button class="wallet-action" onclick="showTokenTransfer('send')">
+                                <div class="asset-symbol flex" slot="icon">
+                                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" id="Layer_1"
+                                        data-name="Layer 1" viewBox="0 0 339.43 295.27">
+                                        <title>tether-usdt-logo</title>
+                                        <path
+                                            d="M62.15,1.45l-61.89,130a2.52,2.52,0,0,0,.54,2.94L167.95,294.56a2.55,2.55,0,0,0,3.53,0L338.63,134.4a2.52,2.52,0,0,0,.54-2.94l-61.89-130A2.5,2.5,0,0,0,275,0H64.45a2.5,2.5,0,0,0-2.3,1.45h0Z"
+                                            style="fill:#50af95;fill-rule:evenodd"></path>
+                                        <path
+                                            d="M191.19,144.8v0c-1.2.09-7.4,0.46-21.23,0.46-11,0-18.81-.33-21.55-0.46v0c-42.51-1.87-74.24-9.27-74.24-18.13s31.73-16.25,74.24-18.15v28.91c2.78,0.2,10.74.67,21.74,0.67,13.2,0,19.81-.55,21-0.66v-28.9c42.42,1.89,74.08,9.29,74.08,18.13s-31.65,16.24-74.08,18.12h0Zm0-39.25V79.68h59.2V40.23H89.21V79.68H148.4v25.86c-48.11,2.21-84.29,11.74-84.29,23.16s36.18,20.94,84.29,23.16v82.9h42.78V151.83c48-2.21,84.12-11.73,84.12-23.14s-36.09-20.93-84.12-23.15h0Zm0,0h0Z"
+                                            style="fill:#fff;fill-rule:evenodd"></path>
+                                        <script xmlns=""></script>
+                                    </svg>
+                                </div>
+                                Convert to USDT
+                            </button>
+
+
+                            <button class="wallet-action" onclick="initConversion('rupee')">
+                                <svg class="icon" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24"
+                                    height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
+                                    <g>
+                                        <rect fill="none" height="24" width="24" />
+                                    </g>
+                                    <g>
+                                        <g>
+                                            <path
+                                                d="M13.66,7C13.1,5.82,11.9,5,10.5,5L6,5V3h12v2l-3.26,0c0.48,0.58,0.84,1.26,1.05,2L18,7v2l-2.02,0c-0.25,2.8-2.61,5-5.48,5 H9.77l6.73,7h-2.77L7,14v-2h3.5c1.76,0,3.22-1.3,3.46-3L6,9V7L13.66,7z" />
+                                        </g>
+                                    </g>
+                                </svg>
+                                Convert to Rupee
+                            </button>
+
+
+                        </div>
+
+
+                        <!-- <a id="wallet_history_button" class="integrated-action-button flex align-center user-element"
+                            href="#/wallet">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24"
+                                width="24px" fill="#000000">
+                                <path d="M0 0h24v24H0V0z" fill="none" />
+                                <path
+                                    d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.25 2.52.77-1.28-3.52-2.09V8z" />
+                            </svg>
+                            View top-up and withdrawal history
+                            <svg class="icon justify-self-end" xmlns="http://www.w3.org/2000/svg" height="24px"
+                                viewBox="0 0 24 24" width="24px" fill="#000000">
+                                <path d="M0 0h24v24H0z" fill="none" />
+                                <path d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z" />
+                            </svg>
+                        </a>
+                        <details class="grid gap-1"
+                            style="border-top: solid thin rgba(var(--text-color), 0.5); padding-top: 1rem; padding-bottom: 1rem;"
+                            open>
+                            <summary style="margin-bottom: 1.5rem;">
+                                <h4 style="font-weight: 500;">Send Rupee tokens to other
+                                    RanchiMall products</h4>
+                                <svg class="icon down-arrow" xmlns="http://www.w3.org/2000/svg" height="24px"
+                                    viewBox="0 0 24 24" width="24px" fill="#000000">
+                                    <path d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z" />
+                                </svg>
+                            </summary>
+                            <div class="actions-wrapper">
+                                <button class="wallet-action" onclick="openExternalTransferPopup('exchange')">
+                                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px"
+                                        viewBox="0 0 24 24" width="24px" fill="#000000">
+                                        <path d="M0 0h24v24H0z" fill="none" />
+                                        <path
+                                            d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z" />
+                                    </svg>
+                                    Exchange market
+                                </button>
+                                <button class="wallet-action" onclick="openExternalTransferPopup('btc-bonds')">
+                                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px"
+                                        viewBox="0 0 24 24" width="24px" fill="#000000">
+                                        <path d="M0 0h24v24H0z" fill="none" />
+                                        <path
+                                            d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z" />
+                                    </svg>
+                                    Blockchain Bonds
+                                </button>
+                                <button class="wallet-action" onclick="openExternalTransferPopup('bobs-fund')">
+                                    <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px"
+                                        viewBox="0 0 24 24" width="24px" fill="#000000">
+                                        <path d="M0 0h24v24H0z" fill="none" />
+                                        <path
+                                            d="M19 19H5V5h7V3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z" />
+                                    </svg>
+                                    Bob's fund
+                                </button>
+                            </div>
+                        </details> -->
+                    </div>
                     <div class="actions-wrapper hidden">
-                        <button class="wallet-action" onclick="openPopup('send_btc_popup')">
+
+
+
+                        <button class="wallet-action" onclick="showTokenTransfer('send')">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24"
                                 width="24px" fill="#000000">
                                 <path d="M0 0h24v24H0z" fill="none" />
                                 <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
                             </svg>
                             Send
+                        </button>
+
+                        <button class="wallet-action" onclick="showTokenTransfer('request')">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24"
+                                width="24px" fill="#000000">
+                                <path d="M0 0h24v24H0V0z" fill="none" />
+                                <path d="M20 12l-1.41-1.41L13 16.17V4h-2v12.17l-5.58-5.59L4 12l8 8 8-8z" />
+                            </svg>
+                            Request
+                        </button>
+                        <button class="wallet-action" onclick="openPopup('topup_wallet_popup', true)">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                viewBox="0 0 24 24" fill="none">
+                                <path
+                                    d="M16.5 13.7619H18.3V16.4762H21V18.2857H18.3V21H16.5V18.2857H13.8V16.4762H16.5V13.7619ZM11.55 2L20.1 6.52381V8.33333H3V6.52381L11.55 2ZM15.6 10.1429H18.3V12.0248L17.4 11.9524C16.77 11.9524 16.167 12.061 15.6 12.26V10.1429ZM3 21V18.2857H12.072C12.243 19.3171 12.711 20.249 13.377 21H3ZM10.2 10.1429H12.9V14.3771C12.486 15.0014 12.198 15.7071 12.072 16.4762H10.2V10.1429ZM4.8 10.1429H7.5V16.4762H4.8V10.1429Z" />
+                            </svg>
+                            Top-up
+                        </button>
+                        <button class="wallet-action" onclick="openPopup('withdraw_wallet_popup')">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+                                viewBox="0 0 24 24" fill="none">
+                                <path
+                                    d="M13.8 16.4762H21V18.2857H13.8V16.4762ZM11.55 2L20.1 6.52381V8.33333H3V6.52381L11.55 2ZM15.6 10.1429H18.3V12.0248L17.4 11.9524C16.77 11.9524 16.167 12.061 15.6 12.26V10.1429ZM3 21V18.2857H12.072C12.243 19.3171 12.711 20.249 13.377 21H3ZM10.2 10.1429H12.9V14.3771C12.486 15.0014 12.198 15.7071 12.072 16.4762H10.2V10.1429ZM4.8 10.1429H7.5V16.4762H4.8V10.1429Z" />
+                            </svg>
+                            Withdraw
+                        </button>
+
+
+
+
+
+                        <button class="wallet-action" onclick="initConversion('btc')">
+                            <svg class="icon" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24"
+                                height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
+                                <g>
+                                    <rect fill="none" height="24" width="24"></rect>
+                                </g>
+                                <g>
+                                    <path
+                                        d="M17.06,11.57C17.65,10.88,18,9.98,18,9c0-1.86-1.27-3.43-3-3.87L15,3h-2v2h-2V3H9v2H6v2h2v10H6v2h3v2h2v-2h2v2h2v-2 c2.21,0,4-1.79,4-4C19,13.55,18.22,12.27,17.06,11.57z M10,7h4c1.1,0,2,0.9,2,2s-0.9,2-2,2h-4V7z M15,17h-5v-4h5c1.1,0,2,0.9,2,2 S16.1,17,15,17z">
+                                    </path>
+                                </g>
+                            </svg>
+                            Convert to BTC
                         </button>
                         <button class="wallet-action" onclick="initConversion('rupee')">
                             <svg class="icon" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24"
@@ -429,10 +710,21 @@
                             </svg>
                             Convert to Rupee
                         </button>
+
                     </div>
 
+
+
+
                 </div>
+                <!-- *********************** -->
+
+
+
+
             </div>
+
+
             <div class="grid hide-on-mobile user-element">
                 <div class="flex align-center space-between">
                     <h4>Recent transactions</h4>
@@ -791,7 +1083,7 @@
         </header>
         <section class="grid gap-2">
             <sm-form>
-                <sm-input id="token_transfer__receiver" placeholder="FLO address" error-text="Invalid FLO address"
+                <sm-input id="token_transfer__receiver" placeholder="BSC address" error-text="Invalid BSC address"
                     data-flo-id animate required autofocus>
                     <button slot="right" class="icon-only" onclick="openPopup('saved_ids_popup')"
                         title="Select from saved IDs">
@@ -803,7 +1095,28 @@
                         </svg>
                     </button>
                 </sm-input>
-                <sm-input id="token_transfer__amount" type="number" placeholder="0" required min="1" step="0.01">
+
+                <!-- ******************************************** -->
+                <sm-input id="token_transfer__amount" type="number" min="10" placeholder="Enter USDT" data-flo-id
+                    animate required autofocus>
+                    <!-- ***************some changes in onclick function removed bracket code -->
+                    <button slot="right" class="icon-only" onclick="openPopup('')" title="Select from saved IDs">
+                    </button>
+                    <div class="asset-symbol flex" slot="icon"><svg class="icon" xmlns="http://www.w3.org/2000/svg"
+                            id="Layer_1" data-name="Layer 1" viewBox="0 0 339.43 295.27">
+                            <title>tether-usdt-logo</title>
+                            <path
+                                d="M62.15,1.45l-61.89,130a2.52,2.52,0,0,0,.54,2.94L167.95,294.56a2.55,2.55,0,0,0,3.53,0L338.63,134.4a2.52,2.52,0,0,0,.54-2.94l-61.89-130A2.5,2.5,0,0,0,275,0H64.45a2.5,2.5,0,0,0-2.3,1.45h0Z"
+                                style="fill:#50af95;fill-rule:evenodd"></path>
+                            <path
+                                d="M191.19,144.8v0c-1.2.09-7.4,0.46-21.23,0.46-11,0-18.81-.33-21.55-0.46v0c-42.51-1.87-74.24-9.27-74.24-18.13s31.73-16.25,74.24-18.15v28.91c2.78,0.2,10.74.67,21.74,0.67,13.2,0,19.81-.55,21-0.66v-28.9c42.42,1.89,74.08,9.29,74.08,18.13s-31.65,16.24-74.08,18.12h0Zm0-39.25V79.68h59.2V40.23H89.21V79.68H148.4v25.86c-48.11,2.21-84.29,11.74-84.29,23.16s36.18,20.94,84.29,23.16v82.9h42.78V151.83c48-2.21,84.12-11.73,84.12-23.14s-36.09-20.93-84.12-23.15h0Zm0,0h0Z"
+                                style="fill:#fff;fill-rule:evenodd"></path>
+                            <script xmlns=""></script>
+                        </svg></div>
+
+                </sm-input>
+                <!-- ******************************************* -->
+                <!-- <sm-input id="token_transfer__amount" type="number" placeholder="0" required min="1" step="0.01">
                     <svg slot="icon" class="icon" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24"
                         height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
                         <g>
@@ -816,13 +1129,20 @@
                             </g>
                         </g>
                     </svg>
-                </sm-input>
-                <sm-input id="token_transfer__remark" pattern="[A-Za-z]" error-text="Only text allowed"
-                    placeholder="Add a message" animate></sm-input>
+                </sm-input> -->
+                <!-- <sm-input id="token_transfer__remark" pattern="[A-Za-z]" error-text="Only text allowed"
+                    placeholder="Add a message" animate></sm-input> -->
+                    <div>
+                        <h3>Fees</h3>
+                        <span>Approximate fee: <b>0.000029983 BNB</b></span>
+                        <p>*Exact fee will be calculated after you fill all the required fields</p>
+                     </div>
                 <div class="multi-state-button">
-                    <button id="token_transfer__button" class="button button--primary cta" onclick="executeUserAction()"
+                    <button id="token_transfer__button" class="button button--primary cta" onclick="sendTx()"
                         type="submit">Send</button>
+
                 </div>
+                <svg viewBox="0 0 64 64" class="loader"><circle cx="32" cy="32" r="32"></circle></svg>
             </sm-form>
         </section>
     </sm-popup>
@@ -893,6 +1213,7 @@
                         </svg>
                         <span class="checkmark">BTC</span>
                     </label>
+
                 </div>
             </fieldset>
             <fieldset class="grid gap-1">
@@ -950,7 +1271,7 @@
             <sm-form id="get_topup_amount_form">
                 <div class="grid gap-0-5">
                     <h4>Top-up wallet</h4>
-                    <p>Add money to your wallet</p>
+                    <p>Add money or add USDT to your wallet</p>
                 </div>
                 <sm-input id="request_cashier_amount" type="number" min="10" error-text="Amount should at least be ₹10"
                     name="amount" placeholder="Amount" autofocus animate required>
@@ -967,7 +1288,25 @@
                         </g>
                     </svg>
                 </sm-input>
+                
+                <!-- ******************* -->
+                <sm-input id="token_transfer__receiver" type="number" min="10" placeholder="Enter USDT" data-flo-id
+                    animate required autofocus>
+                    <div class="asset-symbol flex" slot="icon"><svg class="icon" xmlns="http://www.w3.org/2000/svg"
+                            id="Layer_1" data-name="Layer 1" viewBox="0 0 339.43 295.27">
+                            <title>tether-usdt-logo</title>
+                            <path
+                                d="M62.15,1.45l-61.89,130a2.52,2.52,0,0,0,.54,2.94L167.95,294.56a2.55,2.55,0,0,0,3.53,0L338.63,134.4a2.52,2.52,0,0,0,.54-2.94l-61.89-130A2.5,2.5,0,0,0,275,0H64.45a2.5,2.5,0,0,0-2.3,1.45h0Z"
+                                style="fill:#50af95;fill-rule:evenodd"></path>
+                            <path
+                                d="M191.19,144.8v0c-1.2.09-7.4,0.46-21.23,0.46-11,0-18.81-.33-21.55-0.46v0c-42.51-1.87-74.24-9.27-74.24-18.13s31.73-16.25,74.24-18.15v28.91c2.78,0.2,10.74.67,21.74,0.67,13.2,0,19.81-.55,21-0.66v-28.9c42.42,1.89,74.08,9.29,74.08,18.13s-31.65,16.24-74.08,18.12h0Zm0-39.25V79.68h59.2V40.23H89.21V79.68H148.4v25.86c-48.11,2.21-84.29,11.74-84.29,23.16s36.18,20.94,84.29,23.16v82.9h42.78V151.83c48-2.21,84.12-11.73,84.12-23.14s-36.09-20.93-84.12-23.15h0Zm0,0h0Z"
+                                style="fill:#fff;fill-rule:evenodd"></path>
+                            <script xmlns=""></script>
+                        </svg></div>
+                </sm-input>
+                <!-- ***************** -->
                 <strong id="low_user_flo_warning" class="hidden warning"></strong>
+
                 <button class="button button--primary cta" onclick="continueWalletTopup()"
                     type="submit">Continue</button>
             </sm-form>
@@ -1074,6 +1413,24 @@
                         </g>
                     </svg>
                 </sm-input>
+
+                <!-- ********************************* -->
+                <sm-input id="token_transfer__receiver" placeholder="Enter USDT" error-text="Insufficient USDT Balance"
+                    data-flo-id animate required autofocus>
+                    <div class="asset-symbol flex" slot="icon"><svg class="icon" xmlns="http://www.w3.org/2000/svg"
+                            id="Layer_1" data-name="Layer 1" viewBox="0 0 339.43 295.27">
+                            <title>tether-usdt-logo</title>
+                            <path
+                                d="M62.15,1.45l-61.89,130a2.52,2.52,0,0,0,.54,2.94L167.95,294.56a2.55,2.55,0,0,0,3.53,0L338.63,134.4a2.52,2.52,0,0,0,.54-2.94l-61.89-130A2.5,2.5,0,0,0,275,0H64.45a2.5,2.5,0,0,0-2.3,1.45h0Z"
+                                style="fill:#50af95;fill-rule:evenodd"></path>
+                            <path
+                                d="M191.19,144.8v0c-1.2.09-7.4,0.46-21.23,0.46-11,0-18.81-.33-21.55-0.46v0c-42.51-1.87-74.24-9.27-74.24-18.13s31.73-16.25,74.24-18.15v28.91c2.78,0.2,10.74.67,21.74,0.67,13.2,0,19.81-.55,21-0.66v-28.9c42.42,1.89,74.08,9.29,74.08,18.13s-31.65,16.24-74.08,18.12h0Zm0-39.25V79.68h59.2V40.23H89.21V79.68H148.4v25.86c-48.11,2.21-84.29,11.74-84.29,23.16s36.18,20.94,84.29,23.16v82.9h42.78V151.83c48-2.21,84.12-11.73,84.12-23.14s-36.09-20.93-84.12-23.15h0Zm0,0h0Z"
+                                style="fill:#fff;fill-rule:evenodd"></path>
+                            <script xmlns=""></script>
+                        </svg></div>
+                </sm-input>
+
+                <!-- ******************************** -->
                 <div class="grid gap-1">
                     <div class="grid gap-0-5 hidden">
                         <p>
@@ -1089,6 +1446,9 @@
                         </svg>
                         Add UPI ID
                     </button>
+                    <!-- ************************ -->
+
+                    <!-- *********************** -->
                 </div>
                 <div class="multi-state-button">
                     <button id="withdraw_rupee_button" class="button button--primary cta"
@@ -1143,6 +1503,26 @@
             <button class="button button--primary cta" onclick="saveUpiId()" type="submit">Save</button>
         </sm-form>
     </sm-popup>
+    <!-- ********************** SOME CHANGES save_upi_popup INTO save_upi_popup_1****************************** -->
+    <sm-popup id="save_upi_popup_1">
+        <header slot="header" class="popup__header">
+            <button class="popup__header__close justify-self-start">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"
+                    fill="#000000">
+                    <path d="M0 0h24v24H0V0z" fill="none" />
+                    <path
+                        d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+                </svg>
+            </button>
+            <h3>Save USDT Address</h3>
+        </header>
+        <sm-form>
+            <sm-input id="get_upi_id" placeholder="USDT Address" pattern="[a-zA-Z0-9.\-_]{2,49}@[a-zA-Z._]{2,49}"
+                error-text="Insufficient USDT Balance" autofocus animate required></sm-input>
+            <button class="button button--primary cta" onclick="saveUpiId()" type="submit">Save</button>
+        </sm-form>
+    </sm-popup>
+    <!-- **************************************** -->
     <sm-popup id="send_btc_popup">
         <header slot="header" class="popup__header">
             <button class="popup__header__close justify-self-start">
@@ -1324,6 +1704,48 @@
             </button>
         </sm-form>
     </sm-popup>
+    <!-- <sm-popup id="transaction_confirmed_popup">
+        <header slot="header" class="popup__header">
+            <button class="popup__header__close justify-self-start">
+                <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px"
+                    fill="#000000">
+                    <path d="M0 0h24v24H0V0z" fill="none" />
+                    <path
+                        d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z" />
+                </svg>
+            </button>
+            <h3 id="token_transfer__title"></h3>
+        </header>
+         
+        <div class="grid gap-0-5 " id="transaction_result_popup__content">
+ 
+        </div>
+    </sm-popup> -->
+    <sm-popup id="transaction_result_popup">
+        <header slot="header" class="popup__header">
+          <div class="flex align-center">
+            <button class="popup__header__close" onclick="closePopup()">
+              <svg
+                class="icon"
+                xmlns="http://www.w3.org/2000/svg"
+                height="24px"
+                viewBox="0 0 24 24"
+                width="24px"
+                fill="#000000"
+              >
+                <path d="M0 0h24v24H0V0z" fill="none" />
+                <path
+                  d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"
+                />
+              </svg>
+            </button>
+          </div>
+        </header>
+        <div id="transaction_result_popup__content" class="grid gap-2"></div>
+      </sm-popup>
+
+
+
 
     <!-- Cashier popups -->
     <sm-popup id="confirm_topup_popup">
@@ -1505,6 +1927,9 @@
                     Remove
                 </button>
             </div>
+
+
+
         </fieldset>
     </template>
     <script id="onLoadStartUp">
@@ -1939,6 +2364,7 @@
             };
         }
 
+        // ********************************************************************************
         const tempTransactions = [
             {
                 "txid": "d4569bdfda5da0f8470d82d2fd56c135930dc78a88182bde439592f5596a11ef",
@@ -2037,7 +2463,7 @@
                 "asset": "btc"
             }
         ]
-
+        // ************************************************************************************
         const appState = {
             params: {},
             openedPages: new Set(),
@@ -2102,15 +2528,23 @@
                     getRef('contact__transactions').innerHTML = '<sm-spinner></sm-spinner>'
                     Promise.all([
                         floTokenAPI.fetch(`api/v1.0/getTokenTransactions?token=rupee&senderFloAddress=${floGlobals.myFloID}&destFloAddress=${params.floId}`),
-                        floTokenAPI.fetch(`api/v1.0/getTokenTransactions?token=rupee&senderFloAddress=${params.floId}&destFloAddress=${floGlobals.myFloID}`)])
+                        floTokenAPI.fetch(`api/v1.0/getTokenTransactions?token=rupee&senderFloAddress=${params.floId}&destFloAddress=${floGlobals.myFloID}`),
+                        floTokenAPI.fetch(`api/v1.0/getTokenTransactions?token=usdt_balance&senderFloAddress=${floGlobals.myFloID}&destFloAddress=${params.floId}`),
+                        floTokenAPI.fetch(`api/v1.0/getTokenTransactions?token=usdt_balance&senderFloAddress=${params.floId}&destFloAddress=${floGlobals.myFloID}`)
+                    ]
+                    )
                         .then(([sentTransactions, receivedTransactions]) => {
+
                             const allTransactions = Object.values({ ...sentTransactions.transactions, ...receivedTransactions.transactions }).sort((a, b) => b.transactionDetails.time - a.transactionDetails.time)
+
                             if (contactHistoryLoader) {
                                 contactHistoryLoader.update(allTransactions)
                             } else {
                                 contactHistoryLoader = new LazyLoader('#contact__transactions', allTransactions, render.transactionMessage, { bottomFirst: true });
                             }
+
                             contactHistoryLoader.init()
+
                         }).catch(err => {
                             console.error(err)
                         })
@@ -2157,7 +2591,8 @@
                             try {
                                 upiID = floDapps.user.decrypt(upi_id);
                             } catch (error) {
-                                upiID = "your UPI ID";
+                                console.error("UPI ID is not encrypted with a proper key", error);
+                                return notify("UPI ID is not encrypted with a proper key", 'error');
                             }
                         } else
                             upiID = upi_id;
@@ -2762,6 +3197,8 @@
             openPopup('external_transfer_popup');
         }
 
+        // *********************************************************************************
+
         function externalTransfer() {
             const type = document.getElementById('external_transfer__button').dataset.type;
             let confirmationMessage = '';
@@ -2788,6 +3225,7 @@
                     name = `Bob's Fund`;
                 } break;
             }
+            // ***************************************************************************
             getConfirmation('Continue?', { message: confirmationMessage, confirmText: 'Transfer' }).then(confirmation => {
                 if (confirmation) {
                     floDapps.user.private.then(async privateKey => {
@@ -2834,6 +3272,21 @@
                 showChildElement('asset_actions_wrapper', 1, { entry: slideInLeft, exit: slideOutLeft });
             }
         })
+        // ************ADD ONE MORE GETREF FOR BTC TAB*****************
+        getRef('wallet_section__asset_selector').addEventListener('change', (e) => {
+            if (e.target.value === 'btc') {
+                showChildElement('asset_actions_wrapper_1', 0, { entry: slideInRight, exit: slideOutRight });
+            } else {
+                showChildElement('asset_actions_wrapper_1', 1, { entry: slideInLeft, exit: slideOutLeft });
+            }
+        })
+
+
+
+
+
+
+
 
         async function renderSavedUpiIds(target) {
             let savedUpiIds = []
@@ -2862,6 +3315,9 @@
                 notify(error, 'error');
             })
         }
+        // *****************************
+
+        // *****************************
         function deleteSavedUpi(e) {
             const upiId = e.target.closest('.saved-upi').dataset.upiId;
             getConfirmation('Do you want delete this UPI ID?', {
@@ -3089,7 +3545,10 @@
                 if (confirmation) {
                     User.sendToken(senderID, amount, "|" + remark).then(txid => {
                         console.warn(`Sent ${amount} to ${senderID}`, txid);
+
                         notify(`Sent ${formatAmount(amount)} to ${getFloIdTitle(senderID)}. It may take a few mins to reflect in their wallet`, 'success');
+
+
                         User.decideRequest(User.moneyRequests[reqID], 'PAID: ' + txid)
                             .then(result => console.log(result))
                             .catch(error => console.error(error))
@@ -3097,6 +3556,15 @@
                 }
             })
         }
+
+
+
+        // *****************
+
+
+
+
+        // *****************
 
         userUI.declineRequest = function (reqID) {
             let request = User.moneyRequests[reqID];
@@ -3615,7 +4083,13 @@
                             <svg class="icon margin-right-0-5" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"> <path d="M0 0h24v24H0V0z" fill="none" /> <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" /> </svg>
                             Add UPI ID
                         </button>
-                    </div>
+    
+                     <h4>My USDT Address</h4>
+                        <button class="button justify-self-start" onclick="openPopup('save_upi_popup_1')">
+                        <svg class="icon margin-right-0-5" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"> <path d="M0 0h24v24H0V0z" fill="none" /> <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" /> </svg>
+                            Add USDT Address
+                        </button>
+                          </div>
                     ${floGlobals.isSubAdmin ? html`
                         <div class=" grid gap-1">
                             <div class="grid gap-0-5">
@@ -3628,7 +4102,7 @@
                 `;
             }
         };
-
+        // SOME CHANGES save_upi_popup INTO save_upi_popup_1******************************
         function getTransactionsHistory(filters = floGlobals.appliedFilters || {}) {
             const { asset = 'all', type = 'all', limit = 0 } = filters;
             return new Promise((resolve, reject) => {
@@ -3735,32 +4209,229 @@
                 if (potentialTarget) potentialTarget.remove();
             }
         }
+        // async function refreshBalance(button) {
+        //     if (button)
+        //         buttonLoader(button, true)
+        //     floTokenAPI.getBalance(floGlobals.myFloID).then((balance = 0) => {
+        //         getRef('rupee_balance').textContent = formatAmount(balance)
+        //         if (button)
+        //             buttonLoader(button, false)
+        //     })
+
+        //     btcOperator.getBalance(floGlobals.myBtcID).then((floBalance = 0) => {
+        //         getRef('flo_balance').textContent = formatAmount(floBalance, 'flo')
+        //     })
+
+
+
+        // btcOperator.getBalance(floGlobals.myBtcID).then((usdtBalance = 0) => {
+        //         getRef('usdt_balance').textContent = formatAmount(usdtBalance, 'btc')
+        //     })
+
+
+
+
+        //     btcOperator.getBalance(floGlobals.myBtcID).then((btcBalance = 0) => {
+        //         getRef('btc_balance').textContent = formatAmount(btcBalance, 'btc')
+        //     })
+
+
+        //     try {
+        //         const [floBal, floRates] = await Promise.all([floBlockchainAPI.getBalance(floGlobals.myFloID), floExchangeAPI.getRates('FLO')])
+        //         getRef('flo_balance').textContent = formatAmount(floBal, 'flo')
+        //         if (floBal < floGlobals.settings.user_flo_threshold) {
+        //             getRef('low_user_flo_warning').textContent = `Your FLO balance is low. You will receive ${floGlobals.settings.send_user_flo} FLO of worth ₹${parseFloat(floRates.rate.toFixed(2))} deducted from top-up amount.`;
+        //             getRef('low_user_flo_warning').classList.remove('hidden');
+        //         } else {
+        //             getRef('low_user_flo_warning').classList.add('hidden');
+        //         }
+        //         if (button)
+        //             buttonLoader(button, false)
+        //     } catch (e) {
+        //         console.error(e)
+        //     }
+
+        //  }
+
+        // async function refreshBalance(button) {
+        //     if (button)
+        //         buttonLoader(button, true)
+        //     floTokenAPI.getBalance(floGlobals.myFloID).then((balance = 0) => {
+        //         getRef('rupee_balance').textContent = formatAmount(balance)
+        //         if (button)
+        //             buttonLoader(button, false)
+        //     })
+        //     btcOperator.getBalance(floGlobals.myBtcID).then((btcBalance = 0) => {
+        //         getRef('btc_balance').textContent = formatAmount(btcBalance, 'btc')
+        //     })
+
+        //     try {
+        //         const [floBal, floRates] = 
+        //         await Promise.all([floBlockchainAPI.getBalance(floGlobals.myFloID), floExchangeAPI.getRates('FLO')])
+        //         getRef('flo_balance').textContent = formatAmount(floBal, 'flo')
+        //         if (floBal < floGlobals.settings.user_flo_threshold) {
+        //             getRef('low_user_flo_warning').textContent = `Your FLO balance is low. You will receive ${floGlobals.settings.send_user_flo} FLO of worth ₹${parseFloat(floRates.rate.toFixed(2))} deducted from top-up amount.`;
+        //             getRef('low_user_flo_warning').classList.remove('hidden');
+        //         } else {
+        //             getRef('low_user_flo_warning').classList.add('hidden');
+        //         }
+        //         if (button)
+        //             buttonLoader(button, false)
+        //     } catch (e) {
+        //         console.error(e)
+        //     }
+
+        //    floTokenAPI.getBalance(floGlobals.myFloID).then((usdt_balance= 0) => {
+        //         getRef('usdt_balance').textContent = formatAmount(usdt_balance)
+
+        //     })
+
+        // }
+
+
+        //         async function refreshBalance(button) {
+        //   if (button) buttonLoader(button, true);
+
+        //   // Fetch default FLO token balance
+        //   floTokenAPI.getBalance(floGlobals.myFloID).then((balance = 0) => {
+        //     getRef('rupee_balance').textContent = formatAmount(balance);
+        //     if (button) buttonLoader(button, false);
+        //   });
+
+        //   // Fetch BTC balance
+        //   btcOperator.getBalance(floGlobals.myBtcID).then((btcBalance = 0) => {
+        //     getRef('btc_balance').textContent = formatAmount(btcBalance, 'btc');
+        //   });
+
+        //   try {
+        //     // Fetch FLO balance and FLO exchange rates
+        //     const [floBal, floRates] = await Promise.all([
+        //       floBlockchainAPI.getBalance(floGlobals.myFloID),
+        //       floExchangeAPI.getRates('FLO')
+        //     ]);
+
+        //     getRef('flo_balance').textContent = formatAmount(floBal, 'flo');
+
+        //     // Check if the FLO balance is below the threshold
+        //     if (floBal < floGlobals.settings.user_flo_threshold) {
+        //       getRef('low_user_flo_warning').textContent = `Your FLO balance is low. You will receive ${floGlobals.settings.send_user_flo} FLO of worth ₹${parseFloat(floRates.rate.toFixed(2))} deducted from top-up amount.`;
+        //       getRef('low_user_flo_warning').classList.remove('hidden');
+        //     } else {
+        //       getRef('low_user_flo_warning').classList.add('hidden');
+        //     }
+
+        //     if (button) buttonLoader(button, false);
+        //   } catch (e) {
+        //     console.error(e);
+        //   }
+
+        //   // Fetch USDT balance and update it
+        //   try {
+        //     floTokenAPI.getBalance(floGlobals.myFloID, 'usdt').then((usdtBalance = 0) => {
+        //       getRef('usdt_balance').textContent = formatAmount(usdtBalance, 'usdt');
+        //     });
+        //   } catch (e) {
+        //     console.error('Error fetching USDT balance:', e);
+        //   }
+        // }
+
+
+        // *********************************
         async function refreshBalance(button) {
-            if (button)
-                buttonLoader(button, true)
+            if (button) buttonLoader(button, true);
+
+            // Fetch default FLO token balance
             floTokenAPI.getBalance(floGlobals.myFloID).then((balance = 0) => {
-                getRef('rupee_balance').textContent = formatAmount(balance)
-                if (button)
-                    buttonLoader(button, false)
-            })
+                // Make sure balance is a number before formatting
+                const formattedBalance = typeof balance === 'number' ? balance : parseFloat(balance) || 0;
+                getRef('rupee_balance').textContent = formatAmount(formattedBalance);
+
+                if (button) buttonLoader(button, false);
+            }).catch(error => {
+                // console.error('Error fetching default token balance:', error);
+                if (button) buttonLoader(button, false);
+            });
+
+            // Fetch BTC balance
             btcOperator.getBalance(floGlobals.myBtcID).then((btcBalance = 0) => {
-                getRef('btc_balance').textContent = formatAmount(btcBalance, 'btc')
-            })
+                // Ensure btcBalance is a number before formatting
+                const formattedBtcBalance = typeof btcBalance === 'number' ? btcBalance : parseFloat(btcBalance) || 0;
+                getRef('btc_balance').textContent = formatAmount(formattedBtcBalance, 'btc');
+            }).catch(error => {
+                // console.error('Error fetching BTC balance:', error);
+            });
+
             try {
-                const [floBal, floRates] = await Promise.all([floBlockchainAPI.getBalance(floGlobals.myFloID), floExchangeAPI.getRates('FLO')])
-                getRef('flo_balance').textContent = formatAmount(floBal, 'flo')
-                if (floBal < floGlobals.settings.user_flo_threshold) {
-                    getRef('low_user_flo_warning').textContent = `Your FLO balance is low. You will receive ${floGlobals.settings.send_user_flo} FLO of worth ₹${parseFloat(floRates.rate.toFixed(2))} deducted from top-up amount.`;
+
+                // if (!BSCAddress) {
+                //       const keyToConvert = document
+                //         .querySelector("#check_balance_input")
+                //         .value.trim();
+                //       if (bscOperator.isValidAddress(keyToConvert)) {
+                //         BSCAddress = keyToConvert;
+                //         console.log(BSCAddress,"keyToConvert");
+                //       } else {
+                //         if (/^[0-9a-fA-F]{64}$/.test(keyToConvert)) {
+                //           keyToConvert = coinjs.privkey2wif(keyToConvert);
+                //         }
+                //         console.log("lkkkk", keyToConvert);
+                //         const ethPrivateKey = coinjs.wif2privkey(keyToConvert).privkey;
+                //         BSCAddress = floEthereum.ethAddressFromPrivateKey(ethPrivateKey);
+                //         console.log(BSCAddress,"ethPrivateKey");
+
+                //         floAddress = keyToConvert.startsWith("R")
+                //           ? floCrypto.getFloID(keyToConvert)
+                //           : btcOperator.bech32Address(keyToConvert);
+                //       }
+                //     }
+
+                // Fetch FLO balance and FLO exchange rates
+                var BSCAddress = await getBSCAddress();
+                const [floBal, floRates, BcsBalance] = await Promise.all([
+                    floBlockchainAPI.getBalance(floGlobals.myFloID),
+                    floExchangeAPI.getRates('FLO'),
+                    bscOperator.getTokenBalance(BSCAddress, "usdt"),
+                ]);
+
+                // Ensure floBal is a number before formatting
+                const formattedFloBal = typeof floBal === 'number' ? floBal : parseFloat(floBal) || 0;
+                const formattedUSDTBal = typeof BcsBalance === 'number' ? BcsBalance : parseFloat(BcsBalance) || 0;
+
+                getRef('flo_balance').textContent = formatAmount(formattedFloBal, 'flo');
+                getRef('usdt_balance').textContent = formatAmount(formattedUSDTBal, 'flo');
+
+                // Check if the FLO balance is below the threshold
+                if (formattedFloBal < floGlobals.settings.user_flo_threshold) {
+                    getRef('low_user_flo_warning').textContent = `Your FLO balance is low. You will receive ${floGlobals.settings.send_user_flo} FLO of worth ₹${parseFloat(floRates.rate?.toFixed(2))} deducted from top-up amount.`;
                     getRef('low_user_flo_warning').classList.remove('hidden');
                 } else {
                     getRef('low_user_flo_warning').classList.add('hidden');
                 }
-                if (button)
-                    buttonLoader(button, false)
+
+                if (button) buttonLoader(button, false);
             } catch (e) {
-                console.error(e)
+                console.error('Error fetching FLO balance or rates:', e);
+                if (button) buttonLoader(button, false);
             }
-        }
+
+            // Fetch USDT balance and update it
+            //   try {
+            //     floTokenAPI.getBalance(floGlobals.myFloID, 'usdt').then((usdtBalance = 0) => {
+            //       // Ensure usdtBalance is a number before formatting
+            //       const formattedUsdtBalance = typeof usdtBalance === 'number' ? usdtBalance : parseFloat(usdtBalance) || 0;
+            //       getRef('usdt_balance').textContent = formatAmount(formattedUsdtBalance, 'usdt');
+            //     }).catch(error => {
+            //       console.error('Error fetching USDT balance:', error);
+            //     });
+            //   } catch (e) {
+            //     console.error('Error fetching USDT balance:', e);
+            //   }
+        };
+
+
+
+
+
 
         function getArrayOfSavedIds() {
             const arr = [];
@@ -3902,45 +4573,277 @@
             closePopup()
         })
 
+
+        // let currentUserAction;
+        // function showTokenTransfer(type) {
+        //     getRef('token_transfer__button').textContent = type;
+        //     currentUserAction = type;
+        //     if (type === 'send') {
+        //         getRef('token_transfer__title').textContent = 'Send USDT';
+        //     } else {
+        //         getRef('token_transfer__title').textContent = 'Request USDT';
+        //     }
+        //     if (appState.lastPage === 'contact') {
+        //         getRef('token_transfer__receiver').value = appState.params.floId;
+        //         getRef('token_transfer__receiver').readOnly = true;
+        //         getRef('token_transfer__receiver').querySelector('button').classList.add('hidden');
+        //     } else {
+        //         getRef('token_transfer__receiver').readOnly = false;
+        //         getRef('token_transfer__receiver').querySelector('button').classList.remove('hidden');
+        //     }
+        //     openPopup('token_transfer_popup');
+        //     if (appState.lastPage === 'contact') {
+        //         getRef('token_transfer__amount').focusIn();
+        //     }
+        // }
+
+
+
+
+
+
+
+
+
+
+
+        // function changed
+
         let currentUserAction;
+
+        function validateTokenTransferForm() {
+            const receiver = getRef('token_transfer__receiver').value.trim();
+            const amount = getRef('token_transfer__amount').value.trim();
+            const button = getRef('token_transfer__button');
+
+            // Check if all fields have values
+            if (receiver && amount) {
+                button.disabled = false;
+            } else {
+                button.disabled = true;
+            }
+        }
+
         function showTokenTransfer(type) {
-            getRef('token_transfer__button').textContent = type;
+            const button = getRef('token_transfer__button');
+            button.textContent = type;
             currentUserAction = type;
+
             if (type === 'send') {
-                getRef('token_transfer__title').textContent = 'Send rupee';
+                getRef('token_transfer__title').textContent = 'Send USDT';
             } else {
-                getRef('token_transfer__title').textContent = 'Request rupee';
+                getRef('token_transfer__title').textContent = 'Request USDT';
             }
+
             if (appState.lastPage === 'contact') {
-                getRef('token_transfer__receiver').value = appState.params.floId;
-                getRef('token_transfer__receiver').readOnly = true;
-                getRef('token_transfer__receiver').querySelector('button').classList.add('hidden');
+                const receiverField = getRef('token_transfer__receiver');
+                receiverField.value = appState.params.floId;
+                receiverField.readOnly = true;
+                receiverField.querySelector('button').classList.add('hidden');
             } else {
-                getRef('token_transfer__receiver').readOnly = false;
-                getRef('token_transfer__receiver').querySelector('button').classList.remove('hidden');
+                const receiverField = getRef('token_transfer__receiver');
+                receiverField.readOnly = false;
+                receiverField.querySelector('button').classList.remove('hidden');
             }
+
             openPopup('token_transfer_popup');
+
             if (appState.lastPage === 'contact') {
-                getRef('token_transfer__amount').focusIn();
+                getRef('token_transfer__amount').focus();
             }
+
+            // Call validation to set the button state initially
+            validateTokenTransferForm();
         }
 
+        // Add event listeners to trigger validation on input change
+        getRef('token_transfer__receiver').addEventListener('input', validateTokenTransferForm);
+        getRef('token_transfer__amount').addEventListener('input', validateTokenTransferForm);
 
+
+        // userUI.sendMoneyToUser = function (floID, amount, remark) { getConfirmation('Confirm', { message: `Do you want to send ${amount} to ${getFloIdTitle(floID)}?`, confirmText: 'send' })
+        // .then(confirmation => { 
+        //     if (confirmation) { buttonLoader('token_transfer__button', true); User.sendToken(floID, amount, "|" + remark).then(txid => { console.warn(`Sent ${amount} to ${floID}`, txid);
+        //      // notify(`Sent000000 ${amount} to ${getFloIdTitle(floID)}. It may take a few mins to reflect in their wallet`, 'success');
+        //       openPopup('withdraw_wallet_popup') 
+        //        closePopup() }).catch(error => notify(error, 'error')) .finally(() => { buttonLoader('token_transfer__button', false); 
+        //       })
+        //      } 
+        //     }) 
+        // }
+
+
+
+
+
+
+
+
+
+        // *****************
+        //         userUI.sendMoneyToUser = function (floID, amount, remark) {
+        //     getConfirmation('Confirm', { message: `Do you want to send ${amount} to ${getFloIdTitle(floID)}?`, confirmText: 'send' })
+        //         .then(confirmation => {
+        //             if (confirmation) {
+        //                 buttonLoader('token_transfer__button', true);
+        //                 User.sendToken(floID, amount, "|" + remark)
+        //                     .then(txid => {
+        //                         console.warn(`Sent ${amount} to ${floID}`, txid);
+        //                         // Show confirmation popup with success message
+        //                         openPopup('transaction_confirmed_popup', txid, {
+        //                             message: `Successfully sent ${amount} to ${getFloIdTitle(floID)}. Transaction ID: ${txid}`,
+        //                             type: 'success'
+        //                         });
+        //                     })
+        //                     .catch(error => notify(error, 'error'))
+        //                     .finally(() => {
+        //                         buttonLoader('token_transfer__button', false);
+        //                     });
+        //             }
+        //         });
+        // };
+
+
+        // ************
+
+
+        // ****************************************************************
+
+        // userUI.sendMoneyToUser = function (floID, amount, remark) {
+        //     getConfirmation('Confirm', { message: `Do you want to send ${amount} to ${getFloIdTitle(floID)}?`, confirmText: 'send' })
+        //         .then(confirmation => {
+        //             if (confirmation) {
+        //                 buttonLoader('token_transfer__button', true);
+
+        //                 // Call sendToken and handle the txid result
+        //                 User.sendToken(floID, amount, "|" + remark)
+        //                     .then(txid => {
+        //                         console.warn(`Sent ${amount} to ${floID}`, txid);
+
+        //                         // Display the txid in the UI
+        //                         document.querySelector('#transaction-status').innerHTML = `
+        //                             <div>
+        //                                 <h4>Transaction confirmed</h4>
+        //             <p>Transaction has been confirmed on the blockchain.</p>
+        //           </div>
+        //           <div class="grid">
+        //             <span class="label">Transaction ID</span>
+        //                                 <sm-copy value="${txid}"></sm-copy>
+        //                             </div>
+        //                             <a class="button button--primary" target="_blank" href="https://bscscan.com/tx/${txid}">
+        //                                 Check transaction status
+        //                             </a>
+        //                         `;
+
+        //                         // Show confirmation popup with success message
+        //                         openPopup('transaction_confirmed_popup', txid, {
+        //                             message: `Successfully sent ${amount} to ${getFloIdTitle(floID)}. Transaction ID: ${txid}`,
+        //                             type: 'success'
+        //                         });
+        //                     })
+        //                     .catch(error => notify(error, 'error'))
+        //                     .finally(() => {
+        //                         buttonLoader('token_transfer__button', false);
+        //                     });
+        //             }
+        //         });
+        // };
+
+ 
+
+        // *********************************************************
+
+
+
+
+
+
+        // ***********
         userUI.sendMoneyToUser = function (floID, amount, remark) {
-            getConfirmation('Confirm', { message: `Do you want to send ${amount} to ${getFloIdTitle(floID)}?`, confirmText: 'send' }).then(confirmation => {
-                if (confirmation) {
-                    buttonLoader('token_transfer__button', true);
-                    User.sendToken(floID, amount, "|" + remark).then(txid => {
-                        console.warn(`Sent ${amount} to ${floID}`, txid);
-                        notify(`Sent ${amount} to ${getFloIdTitle(floID)}. It may take a few mins to reflect in their wallet`, 'success');
-                        closePopup()
-                    }).catch(error => notify(error, 'error'))
-                        .finally(() => {
-                            buttonLoader('token_transfer__button', false);
-                        })
-                }
-            })
-        }
+            getConfirmation('Confirm', { message: `Do you want to send ${amount} to ${getFloIdTitle(floID)}?`, confirmText: 'send' })
+                .then(confirmation => {
+                    if (confirmation) {
+                        buttonLoader('token_transfer__button', true);
+
+                        // Call sendToken and handle the txid result
+                        User.sendToken(floID, amount, "|" + remark)
+                            .then(txid => {
+                                console.warn(`Sent ${amount} to ${floID}`, txid);
+
+                                // Confirm txid is valid and log it for verification
+                                if (!txid || txid === 'invalid') {
+                                    notify('Invalid transaction ID. Please try again.', 'error');
+                                    return;
+                                }
+
+                                // Display the txid in the UI
+                                document.querySelector('#transaction-status').innerHTML = `
+                     
+                            <div class="grid gap-0-5 justify-center text-center">
+                              <?xml version="1.0" ?>
+<svg 
+    id="Layer_1" 
+    style="enable-background:new 0 0 512 512; display: block; margin: auto;" 
+    version="1.1" 
+    width="50px" 
+    height="50px" 
+    viewBox="0 0 512 512" 
+    xml:space="preserve" 
+    xmlns="http://www.w3.org/2000/svg" 
+    xmlns:xlink="http://www.w3.org/1999/xlink">
+    
+    <style type="text/css">
+        .st0{fill:#2BB673;}
+        .st1{fill:none;stroke:#000000;stroke-width:30;stroke-miterlimit:10;}
+    </style>
+    
+    <path class="st0" d="M489,255.9c0-0.2,0-0.5,0-0.7c0-1.6,0-3.2-0.1-4.7c0-0.9-0.1-1.8-0.1-2.8c0-0.9-0.1-1.8-0.1-2.7
+        c-0.1-1.1-0.1-2.2-0.2-3.3c0-0.7-0.1-1.4-0.1-2.1c-0.1-1.2-0.2-2.4-0.3-3.6c0-0.5-0.1-1.1-0.1-1.6c-0.1-1.3-0.3-2.6-0.4-4
+        c0-0.3-0.1-0.7-0.1-1C474.3,113.2,375.7,22.9,256,22.9S37.7,113.2,24.5,229.5c0,0.3-0.1,0.7-0.1,1c-0.1,1.3-0.3,2.6-0.4,4
+        c-0.1,0.5-0.1,1.1-0.1,1.6c-0.1,1.2-0.2,2.4-0.3,3.6c0,0.7-0.1,1.4-0.1,2.1c-0.1,1.1-0.1,2.2-0.2,3.3c0,0.9-0.1,1.8-0.1,2.7
+        c0,0.9-0.1,1.8-0.1,2.8c0,1.6-0.1,3.2-0.1,4.7c0,0.2,0,0.5,0,0.7c0,0,0,0,0,0.1s0,0,0,0.1c0,0.2,0,0.5,0,0.7c0,1.6,0,3.2,0.1,4.7
+        c0,0.9,0.1,1.8,0.1,2.8c0,0.9,0.1,1.8,0.1,2.7c0.1,1.1,0.1,2.2,0.2,3.3c0,0.7,0.1,1.4,0.1,2.1c0.1,1.2,0.2,2.4,0.3,3.6
+        c0,0.5,0.1,1.1,0.1,1.6c0.1,1.3,0.3,2.6,0.4,4c0,0.3,0.1,0.7,0.1,1C37.7,398.8,136.3,489.1,256,489.1s218.3-90.3,231.5-206.5
+        c0-0.3,0.1-0.7,0.1-1c0.1-1.3,0.3-2.6,0.4-4c0.1-0.5,0.1-1.1,0.1-1.6c0.1-1.2,0.2-2.4,0.3-3.6c0-0.7,0.1-1.4,0.1-2.1
+        c0.1-1.1,0.1-2.2,0.2-3.3c0-0.9,0.1-1.8,0.1-2.7c0-0.9,0.1-1.8,0.1-2.8c0-1.6,0.1-3.2,0.1-4.7c0-0.2,0-0.5,0-0.7
+        C489,256,489,256,489,255.9C489,256,489,256,489,255.9z" id="XMLID_3_"/>
+    
+    <g id="XMLID_1_">
+        <line class="st1" id="XMLID_2_" x1="213.6" x2="369.7" y1="344.2" y2="188.2"/>
+        <line class="st1" id="XMLID_4_" x1="233.8" x2="154.7" y1="345.2" y2="266.1"/>
+    </g>
+</svg>
+
+                                <h4>Transaction confirmed</h4>
+                                <p>Transaction has been confirmed on the blockchain.</p>
+                            </div>
+                            <div class="grid gap-0">
+                                <span class="label">Transaction ID</span>
+                                <sm-copy value="${txid}"></sm-copy>
+                            </div>
+                            <a class="button button--primary" target="_blank" href="https://bscscan.com/tx/${txid}">
+                                Check transaction status
+                            </a>
+                        `;
+
+                                // Show confirmation popup with success message
+                                openPopup('transaction_confirmed_popup', txid, {
+                                    message: `Successfully sent ${amount} to ${getFloIdTitle(floID)}. Transaction ID: ${txid}`,
+                                    type: 'success'
+                                });
+                            })
+                            .catch(error => {
+                                console.error('Transaction failed:', error);
+                                notify('Transaction failed. Please try again later.', 'error');
+                            })
+                            .finally(() => {
+                                buttonLoader('token_transfer__button', false);
+                            });
+                    }
+                });
+        };
+
+        // ********
 
         userUI.requestMoneyFromUser = function (floID, amount, remark) {
             getConfirmation('Confirm', { message: `Do you want to request ${amount} from ${getFloIdTitle(floID)}?`, confirmText: 'request' }).then(confirmation => {
@@ -4284,6 +5187,12 @@
             })
         }
 
+
+        // *************
+
+
+        // *************
+
         const assetIcons = {
             btc: ` <svg class="icon" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"> <g> <rect fill="none" height="24" width="24"></rect> </g> <g> <path d="M17.06,11.57C17.65,10.88,18,9.98,18,9c0-1.86-1.27-3.43-3-3.87L15,3h-2v2h-2V3H9v2H6v2h2v10H6v2h3v2h2v-2h2v2h2v-2 c2.21,0,4-1.79,4-4C19,13.55,18.22,12.27,17.06,11.57z M10,7h4c1.1,0,2,0.9,2,2s-0.9,2-2,2h-4V7z M15,17h-5v-4h5c1.1,0,2,0.9,2,2 S16.1,17,15,17z"> </path> </g> </svg> `,
             usd: `<svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/></svg>`,
@@ -4458,7 +5367,6 @@
                     } else {
                         result = floExchangeAPI.convertFromBTC(fromAmount, floGlobals.myBtcID, floGlobals.convertSink, await floDapps.user.private)
                     }
-                    console.log(result)
                     renderElem(getRef('conversion_status'), html`
                         <svg class="icon justify-self-center success-icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M9 16.2L5.51 12.7 4.09 14.11 9 19l12-12-1.41-1.41z"/></svg>
                         <h3>Conversion successful</h3>
@@ -4474,12 +5382,321 @@
                                 <p>${e.message}</p>
                             </strong>
                         `)
-                    console.log(e)
                 } finally {
                     buttonLoader('convert_asset', false)
                 }
             })
         }
+
+        function getBSCAddress() {
+            return floDapps.user.private.then(prkey => {
+                var key = coinjs.wif2privkey(prkey)?.privkey;
+                return floEthereum.ethAddressFromPrivateKey(key);
+            });
+        }
+
+
+//         async function sendTx() {
+//             let receiver = await getBSCAddress()
+//             const amount = getRef('token_transfer__amount').value.trim();
+//             const  privateKeypvt = await floDapps.user.private;
+//             privateKey = coinjs.wif2privkey(privateKeypvt)?.privkey;
+//          ;
+//         const asset = 'usdt';
+//         try {
+//           const confirmation = await getConfirmation("Send transaction", {
+//             message: `You are about to send ${amount} ${asset.toUpperCase()} to ${receiver}`,
+//             confirmText: "Send",
+            
+//           });
+// // ///////*******************************************************
+
+ 
+          
+//         //   buttonLoader("send_tx_button", true);
+//           if (!confirmation) return;
+         
+//               const tx = await bscOperator.sendToken({
+//                 // privateKey,
+//                 // receiver,
+//                 // amount,
+//                 // token: asset,
+//               });
+//               console.log(tx,"aaaaaaaaaaaaaaaaaaaaaa");
+//               console.log(tx.hash,"sdfdsfdf");
+//             //   **********************************
+           
+//             // ************************************
+              
+//               showTransactionResult("pending", { "txHash": "tx.hash" });
+            
+//               showTransactionResult("confirmed", { "txHash": "tx.hash" });
+             
+//         } catch (e) {
+//           console.log(e);
+//           showTransactionResult("failed", {
+//             description: `Insufficient ${asset.toUpperCase()} balance`,
+//           });
+//           const regex = /\(error=({.*?}),/;
+//           const match = e.message.match(regex);
+//           if (match && match[1]) {
+//             const { code } = JSON.parse(match[1]);
+//             if (code === -32000)
+//               showTransactionResult("failed", {
+//                 description: `Insufficient ${asset.toUpperCase()} balance`,
+//               });
+//             else {
+//               showTransactionResult("failed", { description: e.message });
+//             }
+//           }
+//         } finally {
+//           buttonLoader("send_tx_button", false);
+//         }
+//       }
+
+
+async function sendTx() {
+    let receiver = await getBSCAddress();
+    const amount = getRef('token_transfer__amount').value.trim();
+    const privateKeypvt = await floDapps.user.private;
+    const privateKey = coinjs.wif2privkey(privateKeypvt)?.privkey;
+    const asset = 'usdt';
+
+    try {
+        const confirmation = await getConfirmation("Send transaction", {
+            message: `You are about to send ${amount} ${asset.toUpperCase()} to ${receiver}`,
+            confirmText: "Send",
+        });
+
+        if (!confirmation) return;
+
+        const tx = await bscOperator.sendToken({
+            privateKey,
+            receiver,
+            amount,
+            token: asset,
+        });
+
+        console.log("Transaction object:", tx);
+        console.log("Transaction Hash:", tx.hash);
+
+        // Show pending transaction status
+        showTransactionResult("pending", { txHash: tx.hash });
+
+        // Add confirmation popup
+        // document.querySelector('#transaction-status').innerHTML = `
+        //     <div class="grid gap-0-5 justify-center text-center">
+        //         <svg id="Layer_1" style="enable-background:new 0 0 512 512; display: block; margin: auto;" version="1.1" width="50px" height="50px" viewBox="0 0 512 512" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        //             <style type="text/css"> .st0{fill:#2BB673;} .st1{fill:none;stroke:#000000;stroke-width:30;stroke-miterlimit:10;} </style>
+        //             <path class="st0" d="M489,255.9c0-..." id="XMLID_3_"/>
+        //             <g id="XMLID_1_">
+        //                 <line class="st1" id="XMLID_2_" x1="213.6" x2="369.7" y1="344.2" y2="188.2"/>
+        //                 <line class="st1" id="XMLID_4_" x1="233.8" x2="154.7" y1="345.2" y2="266.1"/>
+        //             </g>
+        //         </svg>
+        //         <h4>Transaction confirmed</h4>
+        //         <p>Transaction has been confirmed on the blockchain.</p>
+        //     </div>
+        //     <div class="grid gap-0">
+        //         <span class="label">Transaction ID</span>
+        //         <sm-copy value="${tx.hash}"></sm-copy>
+        //     </div>
+        //     <a class="button button--primary" target="_blank" href="https://bscscan.com/tx/${tx.hash}">
+        //         Check transaction status
+        //     </a>
+        // `;
+         
+        // Show confirmed transaction status
+        showTransactionResult("confirmed", { txHash: tx.hash });
+    } catch (e) {
+        console.error(e);
+        showTransactionResult("failed", {
+            description: `Transaction failed. ${e.message}`,
+        });
+
+        const regex = /\(error=({.*?}),/;
+        const match = e.message.match(regex);
+        if (match && match[1]) {
+            const { code } = JSON.parse(match[1]);
+            if (code === -32000) {
+                showTransactionResult("failed", {
+                    description: `Insufficient ${asset.toUpperCase()} balance`,
+                });
+            } else {
+                showTransactionResult("failed", { description: e.message });
+            }
+        }
+    } finally {
+        buttonLoader("send_tx_button", false);
+    }
+}
+
+
+
+      function showTransactionResult(status, { txHash, usdtBalance, bscBalance }) {
+        console.log()
+  let description = "Insufficient BSC balance";
+
+  if (usdtBalance <= 0) {
+    description = "Insufficient USDT balance";
+  } else if (bscBalance <= 0) { 
+    description = "Insufficient BSC balance";
+  }
+
+  switch (status) {
+    case "pending":
+      renderElem(
+        getRef("transaction_result_popup__content"),
+        html`
+          <ul>
+            <li class="transaction__phase">
+              <svg class="icon confirmed" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
+                <path d="M0 0h24v24H0V0z" fill="none" />
+                <path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z" />
+              </svg>
+              <h4>Transaction sent</h4>
+            </li>
+            <li class="transaction__phase">
+              <sm-spinner></sm-spinner>
+              <p>Waiting for transaction to be confirmed</p>
+            </li>
+          </ul>
+          <div class="grid">
+            <span class="label">Transaction ID</span>
+            <sm-copy value=${txHash}></sm-copy>
+          </div>
+          <a class="button button--primary" target="_blank" href=${`https://bscscan.com/tx/${txHash}`}>
+            Check transaction status
+          </a>
+        `
+      );
+      break;
+    case "confirmed":
+      renderElem(
+        getRef("transaction_result_popup__content"),
+        html`
+          <svg 
+          id="Layer_1" 
+          style="enable-background:new 0 0 512 512; display: block; margin: auto;" 
+          version="1.1" 
+          width="50px" 
+          height="50px" 
+          viewBox="0 0 512 512" 
+          xml:space="preserve" 
+          xmlns="http://www.w3.org/2000/svg" 
+          xmlns:xlink="http://www.w3.org/1999/xlink">
+          
+          <style type="text/css">
+              .st0{fill:#2BB673;}
+              .st1{fill:none;stroke:#000000;stroke-width:30;stroke-miterlimit:10;}
+          </style>
+          
+          <path class="st0" d="M489,255.9c0-0.2,0-0.5,0-0.7c0-1.6,0-3.2-0.1-4.7c0-0.9-0.1-1.8-0.1-2.8c0-0.9-0.1-1.8-0.1-2.7
+              c-0.1-1.1-0.1-2.2-0.2-3.3c0-0.7-0.1-1.4-0.1-2.1c-0.1-1.2-0.2-2.4-0.3-3.6c0-0.5-0.1-1.1-0.1-1.6c-0.1-1.3-0.3-2.6-0.4-4
+              c0-0.3-0.1-0.7-0.1-1C474.3,113.2,375.7,22.9,256,22.9S37.7,113.2,24.5,229.5c0,0.3-0.1,0.7-0.1,1c-0.1,1.3-0.3,2.6-0.4,4
+              c-0.1,0.5-0.1,1.1-0.1,1.6c-0.1,1.2-0.2,2.4-0.3,3.6c0,0.7-0.1,1.4-0.1,2.1c-0.1,1.1-0.1,2.2-0.2,3.3c0,0.9-0.1,1.8-0.1,2.7
+              c0,0.9-0.1,1.8-0.1,2.8c0,1.6-0.1,3.2-0.1,4.7c0,0.2,0,0.5,0,0.7c0,0,0,0,0,0.1s0,0,0,0.1c0,0.2,0,0.5,0,0.7c0,1.6,0,3.2,0.1,4.7
+              c0,0.9,0.1,1.8,0.1,2.8c0,0.9,0.1,1.8,0.1,2.7c0.1,1.1,0.1,2.2,0.2,3.3c0,0.7,0.1,1.4,0.1,2.1c0.1,1.2,0.2,2.4,0.3,3.6
+              c0,0.5,0.1,1.1,0.1,1.6c0.1,1.3,0.3,2.6,0.4,4c0,0.3,0.1,0.7,0.1,1C37.7,398.8,136.3,489.1,256,489.1s218.3-90.3,231.5-206.5
+              c0-0.3,0.1-0.7,0.1-1c0.1-1.3,0.3-2.6,0.4-4c0.1-0.5,0.1-1.1,0.1-1.6c0.1-1.2,0.2-2.4,0.3-3.6c0-0.7,0.1-1.4,0.1-2.1
+              c0.1-1.1,0.1-2.2,0.2-3.3c0-0.9,0.1-1.8,0.1-2.7c0-0.9,0.1-1.8,0.1-2.8c0-1.6,0.1-3.2,0.1-4.7c0-0.2,0-0.5,0-0.7
+              C489,256,489,256,489,255.9C489,256,489,256,489,255.9z" id="XMLID_3_"/>
+          
+          <g id="XMLID_1_">
+              <line class="st1" id="XMLID_2_" x1="213.6" x2="369.7" y1="344.2" y2="188.2"/>
+              <line class="st1" id="XMLID_4_" x1="233.8" x2="154.7" y1="345.2" y2="266.1"/>
+          </g>
+      </svg>
+          <div class="grid gap-0-5 justify-center text-center">
+            <h4>Transaction confirmed</h4>
+            <p>Transaction has been confirmed on the blockchain.</p>
+          </div>
+          <div class="grid">
+            <span class="label">Transaction ID</span>
+            <sm-copy value=${txHash}></sm-copy>
+          </div>
+          <a class="button button--primary" target="_blank" href=${`https://bscscan.com/tx/${txHash}`}>
+            Check transaction status
+          </a>
+        `
+      );
+      break;
+    case "failed":
+      renderElem(
+        getRef("transaction_result_popup__content"),
+        html`
+          <svg class="icon user-action-result__icon failed" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" />
+          </svg>
+          <div class="grid gap-0-5 justify-center text-center">
+            <h4>Transaction failed</h4>
+            <p>${description}</p>
+          </div>
+        `
+      );
+      break;
+  }
+  openPopup("transaction_result_popup");
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function sanitizePrivateKey(privateKey) {
+    if (!privateKey.startsWith("0x")) {
+        privateKey = "0x" + privateKey;
+    }
+    // Ensure it's exactly 64 characters after "0x"
+    if (privateKey.length > 66) {
+        privateKey = privateKey.slice(0, 66); // Keep only the first 64 hex characters
+    }
+    return privateKey;
+}
+
+function getBscAddresss(privateKey) {
+    try {
+        // Sanitize the private key
+        privateKey = sanitizePrivateKey(privateKey);
+
+        // Create a wallet instance
+        const wallet = new ethers.Wallet(privateKey);
+
+        // Retrieve the BSC address
+        const bscAddress = wallet.address;
+
+        console.log("BSC Address Ibrah:", bscAddress);
+        return bscAddress;
+    } catch (error) {
+        console.error("Error generating BSC address:", error.message);
+    }
+}
+
+// Example usage
+
+
+
+
+
+    
+
     </script>
 </body>
 
