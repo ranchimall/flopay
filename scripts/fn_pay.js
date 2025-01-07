@@ -22,7 +22,8 @@ User.init = function () {
             callback: userUI.renderCashierRequests //UI_fn
         }));
         //Request received from other Users for token
-        promises.push(floCloudAPI.requestGeneralData(TYPE_MONEY_REQUEST, {
+        promises.push(floCloudAPI.requestGeneralData(
+            TYPE_MONEY_REQUEST, {
             receiverID: myFloID,
             callback: userUI.renderMoneyRequests //UI_fn
         }));
@@ -91,17 +92,18 @@ Object.defineProperty(User, 'cashierRequests', {
 
 Object.defineProperty(User, 'moneyRequests', {
     get: function () {
-        console.log("inside tpay money requests");
+        //console.log("inside tpay money requests");
         
         let fk = floCloudAPI.util.filterKey(TYPE_MONEY_REQUEST, {
             receiverID: myFloID,
         });
+        //console.log("floGlobals.generalData[fk]", floGlobals.generalData[fk]);
         return floGlobals.generalData[fk];
     }
 });
 Object.defineProperty(User, 'usdtRequests', {
     get: function () {
-        console.log("inside tpay USDT requests");
+      //  console.log("inside tpay USDT requests");
         
         let fk = floCloudAPI.util.filterKey(TYPE_USDT_REQUEST, {
             receiverID: myFloID,

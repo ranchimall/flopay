@@ -3325,6 +3325,7 @@ async function sendTransaction() {
     }
     // For "requests" page
     if (appState.currentPage === 'requests') {
+        console.log("for requests requests")
         for (let r in requests) {
             getRef('payment_request_history').querySelectorAll(`[data-vc="${r}"]`).forEach(card => card.remove());
             getRef('payment_request_history').prepend(render.paymentRequestCard(requests[r]));
@@ -3332,6 +3333,8 @@ async function sendTransaction() {
     }
     // For "home" page
     if (appState.currentPage === 'home') {
+        console.log("for requests home")
+
         for (let r in requests) {
             getRef('pending_payment_requests').querySelectorAll(`[data-vc="${r}"]`).forEach(card => card.remove());
         }
@@ -3340,6 +3343,7 @@ async function sendTransaction() {
     if (floGlobals.loaded) {
         for (let r in requests) {
             if (!requests[r].note) {
+                console.log(`You have received a USDT request from ${getEthIdTitle(requests[r].senderID)}`)
                 notify(`You have received a USDT request from ${getEthIdTitle(requests[r].senderID)}`, '', {
                     action: {
                         label: 'View',
@@ -3387,6 +3391,11 @@ async function sendTransaction() {
                         pendingPaymentRequests.prepend(render.paymentRequestCard(User.moneyRequests[transactionId]))
                     }
                 }
+                for (const transactionId in User.usdtRequests) {
+                    if (!User.usdtRequests[transactionId].note) {
+                        pendingPaymentRequests.prepend(render.paymentUsdtRequestCard(User.usdtRequests[transactionId]))
+                    }
+                }
                 getRef('pending_payment_requests').innerHTML = ''
                 getRef('pending_payment_requests').append(pendingPaymentRequests)
 
@@ -3406,6 +3415,7 @@ async function sendTransaction() {
                 closeNotificationPanel()
             }
         }
+        
         function detectOutsideClick(e) {
             if (e.target.closest('#notifications_panel')) return;
             closeNotificationPanel();
@@ -3506,9 +3516,14 @@ async function sendTransaction() {
 
         userUI.declineRequest = function (reqID) {
             let request = User.moneyRequests[reqID];
+            let requestusdt = User.usdtRequests[reqID];
             getConfirmation('Decline payment?', { confirmText: 'Decline' }).then(confirmation => {
                 if (confirmation) {
                     User.decideRequest(request, "DECLINED").then(result => {
+                        console.log(result);
+                        notify("Request declined", 'success');
+                    }).catch(error => console.error(error))
+                    User.decideRequest(requestusdt, "DECLINED").then(result => {
                         console.log(result);
                         notify("Request declined", 'success');
                     }).catch(error => console.error(error))
@@ -3806,10 +3821,36 @@ async function sendTransaction() {
                 return clone;
             },
             paymentRequestCard(details) {
+                console.log('Inside payement request card')
                 const { time, senderID, message: { amount, remark }, note, vectorClock } = details;
                 const clone = getRef(`${note ? 'processed' : 'pending'}_payment_request_template`).content.cloneNode(true).firstElementChild;
                 clone.dataset.vc = vectorClock;
+                console.log('Sender ID:', getFloIdTitle(senderID));    
                 clone.querySelector('.payment-request__requestor').textContent = getFloIdTitle(senderID);
+                clone.querySelector('.payment-request__remark').textContent = remark;
+                clone.querySelector('.payment-request__time').textContent = getFormattedTime(time);
+                clone.querySelector('.payment-request__amount').textContent = amount.toLocaleString(`en-IN`, { style: 'currency', currency: 'INR' });
+                const status = note ? note.split(':')[0] : 'PENDING';
+                if (note) {
+                    clone.firstElementChild.href = `#/transaction?transactionId=${vectorClock}&type=request`;
+                    let icon
+                    if (status === 'PAID')
+                        icon = `<svg class="icon paid" xmlns="http://www.w3.org/2000/svg" enable-background="new 0 0 24 24" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><g><rect fill="none" height="24" width="24"/></g><g><path d="M23,12l-2.44-2.79l0.34-3.69l-3.61-0.82L15.4,1.5L12,2.96L8.6,1.5L6.71,4.69L3.1,5.5L3.44,9.2L1,12l2.44,2.79l-0.34,3.7 l3.61,0.82L8.6,22.5l3.4-1.47l3.4,1.46l1.89-3.19l3.61-0.82l-0.34-3.69L23,12z M10.09,16.72l-3.8-3.81l1.48-1.48l2.32,2.33 l5.85-5.87l1.48,1.48L10.09,16.72z"/></g></svg>`
+                    else
+                        icon = `<svg class="icon declined" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0z" fill="none"/><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zM4 12c0-4.42 3.58-8 8-8 1.85 0 3.55.63 4.9 1.69L5.69 16.9C4.63 15.55 4 13.85 4 12zm8 8c-1.85 0-3.55-.63-4.9-1.69L18.31 7.1C19.37 8.45 20 10.15 20 12c0 4.42-3.58 8-8 8z"/></svg>`
+                    clone.querySelector('.payment-request__status').innerHTML = `${status.toLowerCase()} ${icon}`;
+                }
+                return clone;
+            },
+            paymentUsdtRequestCard(details) {
+                console.log('Inside payement usdt request card')
+
+                const { time, senderID, message: { amount, remark }, note, vectorClock } = details;
+                const clone = getRef(`${note ? 'processed' : 'pending'}_payment_request_template`).content.cloneNode(true).firstElementChild;
+                clone.dataset.vc = vectorClock;
+                console.log("Sender ID:",getEthIdTitle(senderID));
+                
+                clone.querySelector('.payment-request__requestor').textContent = getEthIdTitle(senderID);
                 clone.querySelector('.payment-request__remark').textContent = remark;
                 clone.querySelector('.payment-request__time').textContent = getFormattedTime(time);
                 clone.querySelector('.payment-request__amount').textContent = amount.toLocaleString(`en-IN`, { style: 'currency', currency: 'INR' });
