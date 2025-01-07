@@ -307,12 +307,12 @@
                             <span id="rupee_balance"></span>
                         </div>
                         <div class="flex align-center space-between balance-card">
-                            <span>FLOs</span>
+                            <span>FLO</span>
                             <span id="flo_balance"></span>
                         </div>
 
                         <div class="flex align-center space-between balance-card">
-                            <span>USDT Ikp</span>
+                            <span>BSC USDT</span>
                             <span id="usdt_balance"></span>
 
 
@@ -334,7 +334,7 @@
                 </div>
                 <sm-chips id="wallet_section__asset_selector" class="user-element">
                     <sm-chip value="rupee" selected>Rupee</sm-chip>
-                    <sm-chip value="usdt">USDT</sm-chip>
+                    <sm-chip value="usdt">BSC USDT</sm-chip>
                     <sm-chip value="btc">BTC</sm-chip>
 
                 </sm-chips>
@@ -1083,7 +1083,7 @@
         </header>
         <section class="grid gap-2">
             <sm-form>
-                <sm-input id="token_transfer__receiver" placeholder="BSC address" error-text="Invalid BSC address"
+                <sm-input id="token_transfer__receiver" placeholder="BSC/FLO address"  
                     data-flo-id animate required autofocus>
                     <button slot="right" class="icon-only" onclick="openPopup('saved_ids_popup')"
                         title="Select from saved IDs">
@@ -1142,7 +1142,7 @@
                         type="submit">Send</button>
 
                 </div>
-                <svg viewBox="0 0 64 64" class="loader"><circle cx="32" cy="32" r="32"></circle></svg>
+                <!-- <svg viewBox="0 0 64 64" class="loader"><circle cx="32" cy="32" r="32"></circle></svg> -->
             </sm-form>
         </section>
     </sm-popup>
