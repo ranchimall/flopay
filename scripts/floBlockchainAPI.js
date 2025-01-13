@@ -3,6 +3,9 @@
     'use strict';
     const floBlockchainAPI = EXPORTS;
 
+
+
+
     const DEFAULT = {
         blockchain: floGlobals.blockchain,
         apiURL: {
@@ -151,6 +154,10 @@
                 .catch(error => reject(error))
         });
     }
+
+
+     
+    
 
     function getScriptPubKey(address) {
         var tx = bitjs.transaction();
