@@ -1140,7 +1140,7 @@
                 <div class="multi-state-button">
                     <button id="token_transfer__button" class="button button--primary cta" onclick="sendTx()"
                         type="submit">Send</button>
-
+                        
                 </div>
                 <!-- <svg viewBox="0 0 64 64" class="loader"><circle cx="32" cy="32" r="32"></circle></svg> -->
             </sm-form>
@@ -3738,6 +3738,15 @@
             if (currency === 'btc') {
                 formattingOptions.maximumFractionDigits = 8;
             }
+            if (currency == 'USDT') {
+               
+                 
+               
+                return currency + " " + amount;
+               formattingOptions.maximumFractionDigits = 8;
+               return amount.toLocaleString(currency, formattingOptions)
+           }
+             
             return amount.toLocaleString(currency === 'inr' ? `en-IN` : 'en-US', formattingOptions)
         }
         function copyToClipboard(textToCopy) {
@@ -4398,7 +4407,7 @@
                 const formattedUSDTBal = typeof BcsBalance === 'number' ? BcsBalance : parseFloat(BcsBalance) || 0;
 
                 getRef('flo_balance').textContent = formatAmount(formattedFloBal, 'flo');
-                getRef('usdt_balance').textContent = formatAmount(formattedUSDTBal, 'flo');
+                getRef('usdt_balance').textContent = formatAmount(formattedUSDTBal, 'USDT');
 
                 // Check if the FLO balance is below the threshold
                 if (formattedFloBal < floGlobals.settings.user_flo_threshold) {
@@ -5469,6 +5478,8 @@ async function sendTx() {
         });
 
         if (!confirmation) return;
+        
+        buttonLoader("token_transfer__button", true);
 
         const tx = await bscOperator.sendToken({
             privateKey,
@@ -5479,10 +5490,10 @@ async function sendTx() {
 
         console.log("Transaction object:", tx);
         console.log("Transaction Hash:", tx.hash);
-
+         
         // Show pending transaction status
         showTransactionResult("pending", { txHash: tx.hash });
-
+        
         // Add confirmation popup
         // document.querySelector('#transaction-status').innerHTML = `
         //     <div class="grid gap-0-5 justify-center text-center">
