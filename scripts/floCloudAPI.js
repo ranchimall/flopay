@@ -285,8 +285,11 @@
     }
 
     function singleRequest(floID, data_obj, method = "POST") {
+        console.log(" inside singleRequest");
         return new Promise((resolve, reject) => {
             let data;
+            console.log("data_obj", data_obj);
+            console.log("method", method);
             if (method === "POST")
                 data = {
                     method: "POST",
@@ -295,6 +298,9 @@
             else
                 data = new URLSearchParams(JSON.parse(JSON.stringify(data_obj))).toString();
             fetch_ActiveAPI(floID, data).then(response => {
+
+                console.log("inide fetch_ActiveAPI");
+                console.log("response", response);
                 if (response.ok)
                     response.json()
                         .then(result => resolve(result))
@@ -467,8 +473,10 @@
     }
 
     function storeGeneral(fk, dataSet) {
+        console.log(" inside storeGeneral");
+        
         try {
-            console.log(dataSet)
+            console.log(" dataSet", dataSet)
             if (typeof generalData[fk] !== "object")
                 generalData[fk] = {}
             for (let vc in dataSet) {
@@ -478,6 +486,7 @@
             }
             compactIDB.writeData("lastVC", lastVC[fk], fk)
             compactIDB.writeData("generalData", generalData[fk], fk)
+            console.log("generalData[fk]", generalData[fk])
         } catch (error) {
             console.error(error)
         }
@@ -530,7 +539,9 @@
 
     //send any message to supernode cloud storage
     const sendApplicationData = floCloudAPI.sendApplicationData = function (message, type, options = {}) {
+        console.log("inside send Application Data");
         return new Promise((resolve, reject) => {
+            
             var data = {
                 senderID: user.id,
                 receiverID: options.receiverID || DEFAULT.adminID,
@@ -541,6 +552,7 @@
                 type: type,
                 comment: options.comment || ""
             }
+            console.log(" The Data inside send Applications are ", data)    
             let hashcontent = ["receiverID", "time", "application", "type", "message", "comment"]
                 .map(d => data[d]).join("|")
             data.sign = user.sign(hashcontent);
@@ -695,21 +707,51 @@
     }
 
     //send general data
-    floCloudAPI.sendGeneralData = function (message, type, options = {}) {
-        return new Promise((resolve, reject) => {
-            if (options.encrypt) {
-                let encryptionKey = options.encrypt === true ?
-                    floGlobals.settings.encryptionKey : options.encrypt
-                message = floCrypto.encryptData(JSON.stringify(message), encryptionKey)
-            }
-            sendApplicationData(message, type, options)
-                .then(result => resolve(result))
-                .catch(error => reject(error))
-        })
-    }
+//     floCloudAPI.sendGeneralData = function (message, type, options = {}) {
+//         console.log("inside sendgeneralData")
+//     return new Promise((resolve, reject) => {
+//         try {
+//             // if (options.encrypt) {
+//             //     const encryptionKey = options.encrypt === true 
+//             //         ? floGlobals.settings.encryptionKey 
+//             //         : options.encrypt;
+
+//             //         if (!encryptionKey) {
+//             //             console.error("Encryption key is not set. Ensure floGlobals.settings.encryptionKey is defined.");
+//             //             return reject(new Error("Encryption key is undefined."));
+//             //         }
+
+//             //     message = floCrypto.encryptData(JSON.stringify(message), encryptionKey);
+//             // }
+//             sendApplicationData(message, type, options)
+//                 .then(result => resolve(result))
+//                 .catch(error => reject(error));
+//                 console.log("options inside application data",options)
+//         } catch (error) {
+//             console.error("Error in sendGeneralData:", error);
+//             reject(error);
+//         }
+//     });
+// };
+floCloudAPI.sendGeneralData = function (message, type, options = {}) {
+    console.log("inside sendgeneralData")
+    return new Promise((resolve, reject) => {
+        if (options.encrypt) {
+            let encryptionKey = options.encrypt === true ?
+                floGlobals.settings.encryptionKey : options.encrypt
+            message = floCrypto.encryptData(JSON.stringify(message), encryptionKey)
+        }
+        sendApplicationData(message, type, options)
+            .then(result => resolve(result))
+            .catch(error => reject(error))
+            console.log("message: ",message,"type: ",type,"options:",options)
+    })
+}
+
 
     //request general data
     floCloudAPI.requestGeneralData = function (type, options = {}) {
+        console.log("inside requestGeneralData")
         return new Promise((resolve, reject) => {
             var fk = filterKey(type, options)
             lastVC[fk] = parseInt(lastVC[fk]) || 0;
@@ -720,10 +762,12 @@
                     storeGeneral(fk, d);
                     options.callback(d, e)
                 }
+                console.log("inside requestGeneralData if")
                 _requestApplicationData(type, new_options)
                     .then(result => resolve(result))
                     .catch(error => reject(error))
             } else {
+                console.log("inside requestGeneralData else")
                 _requestApplicationData(type, options).then(dataSet => {
                     storeGeneral(fk, objectifier(dataSet))
                     resolve(dataSet)

@@ -894,8 +894,8 @@
         </header>
         <section class="grid gap-2">
             <sm-form>
-                <sm-input id="usdt_request_receiver" placeholder="ETH Address" error-text="Invalid ETH address"
-                data-eth-address animate required autofocus>
+                <sm-input id="usdt_request_receiver" placeholder="Flo Address" error-text="Invalid flo address"
+                data-flo-id animate required autofocus>
                     <button slot="right" class="icon-only" onclick="openPopup('saved_ids_popup')"
                         title="Select from saved IDs">
                         <svg class="icon" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24"
@@ -2327,7 +2327,11 @@
                         if (User.moneyRequests[transactionId].note) {
                             paymentRequests.unshift(User.moneyRequests[transactionId])
                         }
+                        if (User.usdtRequests[transactionId].note) {
+                            paymentRequests.unshift(User.usdtRequests[transactionId])
+                        }
                     }
+                   
                     if (paymentRequestsLoader) {
                         paymentRequestsLoader.update(paymentRequests)
                     } else {
@@ -3296,7 +3300,9 @@ async function sendTransaction() {
             if (floGlobals.loaded) {
                 for (let r in requests) {
                     if (!requests[r].note) {
+                        console.log(`You have received payment request from ${getFloIdTitle(requests[r].senderID)}`);    
                         notify(`You have received payment request from ${getFloIdTitle(requests[r].senderID)}`, '', {
+                       
                             action: {
                                 label: 'View',
                                 callback: () => {
@@ -3310,6 +3316,9 @@ async function sendTransaction() {
             let totalRequests = 0;
             for (const request in User.moneyRequests) {
                 if (!User.moneyRequests[request].note) totalRequests++;
+            }
+            for (const request in User.usdtRequests) {
+                if (!User.usdtRequests[request].note) totalRequests++;
             }
             if (totalRequests) {
                 addNotificationBadge('requests_notification_button', totalRequests)
@@ -4392,6 +4401,7 @@ async function sendTransaction() {
         }
 
         userUI.requestMoneyFromUser = function (floID, amount, remark) {
+            console.log("inside requestMoneyFromUser", floID, amount, remark);
             getConfirmation('Confirm', { message: `Do you want to request ${amount} from ${getFloIdTitle(floID)}?`, confirmText: 'request' }).then(confirmation => {
                 if (confirmation) {
                     buttonLoader('token_transfer__button', true);
@@ -4407,31 +4417,37 @@ async function sendTransaction() {
             })
         }
         userUI.requestUsdtFromUser = function (receiver, amount, remark) {
-    getConfirmation('Confirm', {
-        message: `Do you want to request ${amount} USDT from ${receiver}?`,
-        confirmText: 'Request',
+            console.log("inside requestUsdtFromUser", receiver, amount, remark);
+          getConfirmation('Confirm', {
+        message: `Do you want to request ${amount} USDT from Ethereum address ${receiver}?`,
+        confirmText: 'Request'
     }).then(confirmation => {
         if (confirmation) {
-            buttonLoader('token_transfer__button', true); // Show loader on the button
+            console.log("teset 2");
+            buttonLoader('token_transfer__button', true);
 
-            User.requestUsdt(receiver, amount, remark).then(result => {
-                    console.log("inside request usdt token")
-                    console.log(`Requested ${amount} USDT from ${receiver}`, result);
+            User.requestUsdt(receiver, amount, remark)
+                .then(result => {
+                    console.log("indide requestUsdt result", result);
                     notify(`Requested ${amount} USDT from ${receiver}`, 'success');
-                    closePopup(); // Close the request popup
+                    console.log(`Requested ${amount} USDT from ${receiver}`, result);                   
+                    closePopup();
                 })
                 .catch(error => {
                     console.error('Error requesting USDT:', error);
                     notify(error.message || 'Failed to request USDT. Please try again.', 'error');
                 })
                 .finally(() => {
-                    buttonLoader('token_transfer__button', false); // Remove loader from the button
+                    buttonLoader('token_transfer__button', false);
+
                 });
         }
     });
 };
 
+
         function executeUserAction() {
+            console.log("inside executeUserAction");
             const floID = getRef('token_transfer__receiver').value.trim(),
                 amount = parseFloat(getRef('token_transfer__amount').value),
                 remark = getRef('token_transfer__remark').value.trim();
@@ -4443,6 +4459,7 @@ async function sendTransaction() {
         }
 
         function executeUsdtAction() {
+            console.log("inside executeUsdtAction");        
     const receiver = getRef('usdt_request_receiver').value.trim(),
         amount = parseFloat(getRef('usdt_request_amount').value),
         remark = getRef('usdt_request__remark').value.trim();

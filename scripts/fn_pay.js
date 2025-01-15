@@ -29,6 +29,7 @@ User.init = function () {
         }));
 
         promises.push(floCloudAPI.requestGeneralData(TYPE_USDT_REQUEST, {
+            //console.log("inside request general data")
             receiverID: myFloID,
             callback: userUI.renderUsdtRequests
         }))
@@ -103,6 +104,7 @@ Object.defineProperty(User, 'moneyRequests', {
 });
 Object.defineProperty(User, 'usdtRequests', {
     get: function () {
+        console.log("inside define property usdtrequests");
       //  console.log("inside tpay USDT requests");
         
         let fk = floCloudAPI.util.filterKey(TYPE_USDT_REQUEST, {
@@ -176,8 +178,8 @@ User.sendToken = function (receiverID, amount, remark = '', options = {}) {
 }
 
 User.requestToken = function (floID, amount, remark = '') {
+    console.log("inside request token");
     return new Promise((resolve, reject) => {
-        console.log("inside request token");
         floCloudAPI.sendGeneralData({
             amount: amount,
             remark: remark
@@ -187,17 +189,46 @@ User.requestToken = function (floID, amount, remark = '') {
             .catch(error => reject(error))
     })
 }
+
 User.requestUsdt = function (receiver, amount, remark = '') {
+    console.log("inside requestUsdt ")
+    console.log(receiver, amount, remark);
+    
     return new Promise((resolve, reject) => {
         floCloudAPI.sendGeneralData( { // Corrected the argument order
             amount: amount,
             remark: remark,
         }, TYPE_USDT_REQUEST, {  
-            receiverID: myFloID
+            receiverID: receiver
         }).then(result => resolve(result)).catch(error => reject(error));
     });
 };
 
+// userUI.requestUsdtFromUser = function (receiver, amount, remark) {
+   
+//     getConfirmation('Confirm', {
+//         message: `Do you want to request ${amount} USDT from ${receiver}?`,
+//         confirmText: 'Request',
+//     }).then(confirmation => {
+//         if (confirmation) {
+//             buttonLoader('token_transfer__button', true); // Show loader on the button
+
+//             User.requestUsdt(receiver, amount, remark).then(result => {
+//                     console.log("inside request usdt token")
+//                     console.log(`Requested ${amount} USDT from ${receiver}`, result);
+//                     notify(`Requested ${amount} USDT from ${receiver}`, 'success');
+//                     closePopup(); // Close the request popup
+//                 })
+//                 .catch(error => {
+//                     console.error('Error requesting USDT:', error);
+//                     notify(error.message || 'Failed to request USDT. Please try again.', 'error');
+//                 })
+//                 .finally(() => {
+//                     buttonLoader('token_transfer__button', false); // Remove loader from the button
+//                 });
+//         }
+//     });
+// };
 
 User.decideRequest = function (request, note) {
     return new Promise((resolve, reject) => {
