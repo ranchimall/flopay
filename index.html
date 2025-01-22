@@ -3670,7 +3670,8 @@ async function sendTransaction() {
                 const result = await User.decideRequest(User.usdtRequests[reqID], 'PAID: ' + txid);
                 console.log(result);
             } catch (error) {
-                notify('Error in sending USDT', error)
+                
+                notify(`Error in sending USDT`, 'error')
                 console.error('Error in sending USDT', error);
             }
         }
