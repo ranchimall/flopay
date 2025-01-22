@@ -397,7 +397,8 @@
   // };
     const sendToken = ethOperator.sendToken = async ({ token, privateKey, amount, receiver, contractAddress }) => {
       console.log("Inside sendToken");
-  
+      console.log("Private Key inside ethOperator.sendToken",privateKey)
+      console.log("contractAddress inside ethOperator.sendToken",contractAddress)
       const wallet = new ethers.Wallet(privateKey, getProvider());
       console.log("Wallet Address:", wallet.address);
   

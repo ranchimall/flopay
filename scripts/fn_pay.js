@@ -104,9 +104,6 @@ Object.defineProperty(User, 'moneyRequests', {
 });
 Object.defineProperty(User, 'usdtRequests', {
     get: function () {
-        console.log("inside define property usdtrequests");
-      //  console.log("inside tpay USDT requests");
-        
         let fk = floCloudAPI.util.filterKey(TYPE_USDT_REQUEST, {
             receiverID: myFloID,
         });
@@ -162,11 +159,29 @@ User.tokenToCash = function (cashier, amount, blkTxID, upiID) {
             .catch(error => reject(error))
     })
 }
-
 User.sendToken = function (receiverID, amount, remark = '', options = {}) {
     return new Promise((resolve, reject) => {
         floDapps.user.private.then(privateKey => {
             floTokenAPI.sendToken(privateKey, amount, receiverID, remark, floTokenAPI.currency, options)
+                .then(result => resolve(result))
+                .catch(error => reject(error))
+        }).catch(error => {
+            console.log(error);
+            notify('Invalid password', 'error');
+            reject(error);
+        })
+    })
+}
+User.sendusdtToken = function (receiverID, amount, remark = '', options = {}) {
+    console.log("inside sendusdtToken")
+    console.log('receiverID',receiverID, amount,'amount', remark,'remark',options,'options' )
+    return new Promise((resolve, reject) => {
+        floDapps.user.private.then(privateKey => {
+            privateKey = coinjs.wif2privkey(privateKey);  // Convert WIF to private key object
+            privateKey = privateKey.privkey;  // Correctly access the "privkey" property
+            console.log("private Key privkey", privateKey);
+            ethOperator.sendToken({privateKey,receiverID,amount,token:'usdt'})
+          //floTokenAPI.sendUsdtToken(privateKey, amount, receiverID, remark, options)
                 .then(result => resolve(result))
                 .catch(error => reject(error))
         }).catch(error => {
