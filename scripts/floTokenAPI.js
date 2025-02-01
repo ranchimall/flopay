@@ -142,7 +142,7 @@
             trx.addinput(utxo, vout, scriptPubKey)
             trx.addoutput(receiverID, floBlockchainAPI.sendAmt);
             trx.addflodata(`send ${amount} ${token}#`);
-            var signedTxHash = trx.sign(privKey, 1);
+            var signedTxHash = trx.sign(privKey, 1);     
             floBlockchainAPI.broadcastTx(signedTxHash)
                 .then(txid => resolve([receiverID, txid]))
                 .catch(error => reject([receiverID, error]))

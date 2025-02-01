@@ -3478,8 +3478,12 @@ async function sendTransaction() {
     if (floGlobals.loaded) {
         for (let r in requests) {
             if (!requests[r].note) {
-                console.log(`You have received a USDT request from ${getEthIdTitle(requests[r].senderID)}`)
-                notify(`You have received a USDT request from ${getEthIdTitle(requests[r].senderID)}`, '', {
+               const senderID=  "0x" + keccak256("0x" + requests[r].pubKey.slice(4)).slice(-40);
+              
+                console.log("senderID",senderID)
+                console.log("reqiests",requests)
+                console.log(`You have received a USDT request from ${getEthIdTitle(senderID)}`)
+                notify(`You have received a USDT request from ${getEthIdTitle(senderID)}`, '', {
                     action: {
                         label: 'View',
                         callback: () => {
@@ -3649,10 +3653,13 @@ async function sendTransaction() {
                 }
             })
         }
+        
         userUI.usdtpayRequest = async function (reqID) {
-    let { message: { amount, remark }, senderID } = User.usdtRequests[reqID];
+    let { message: { amount, remark }, senderID ,pubKey} = User.usdtRequests[reqID];
+    console.log(pubKey,"pubkey")
+    senderID=floEthereum.ethAddressFromPublicKey(coinjs.pubkeydecompress(pubKey));
     console.log("amount",amount);
-    console.log("sendersID",senderID);
+    console.log("sendersID inside usdtpay requests",senderID);
     try {
         const confirmation = await getConfirmation('Pay?', {
             message: `Do you want to pay ${amount} USDT to ${senderID}?`,
@@ -3671,7 +3678,7 @@ async function sendTransaction() {
                 console.log(result);
             } catch (error) {
                 
-                notify(`Error in sending USDT`, 'error')
+                notify(`Error in sending USDT`, 'error',error.message)
                 console.error('Error in sending USDT', error);
             }
         }

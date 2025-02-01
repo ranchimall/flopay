@@ -172,6 +172,8 @@ User.sendToken = function (receiverID, amount, remark = '', options = {}) {
         })
     })
 }
+
+
 User.sendusdtToken = function (receiverID, amount, remark = '', options = {}) {
     console.log("inside sendusdtToken")
     console.log('receiverID',receiverID, amount,'amount', remark,'remark',options,'options' )
@@ -181,7 +183,6 @@ User.sendusdtToken = function (receiverID, amount, remark = '', options = {}) {
             privateKey = privateKey.privkey;  // Correctly access the "privkey" property
             console.log("private Key privkey", privateKey);
             ethOperator.sendToken({privateKey,receiverID,amount,token:'usdt'})
-          //floTokenAPI.sendUsdtToken(privateKey, amount, receiverID, remark, options)
                 .then(result => resolve(result))
                 .catch(error => reject(error))
         }).catch(error => {
@@ -208,7 +209,6 @@ User.requestToken = function (floID, amount, remark = '') {
 User.requestUsdt = function (receiver, amount, remark = '') {
     console.log("inside requestUsdt ")
     console.log(receiver, amount, remark);
-    
     return new Promise((resolve, reject) => {
         floCloudAPI.sendGeneralData( { // Corrected the argument order
             amount: amount,

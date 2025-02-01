@@ -207,6 +207,39 @@
         .catch((error) => reject("Init userDB failed"));
     });
   }
+  const ethAddressFromPublicKey = (floEthereum.ethAddressFromPublicKey =
+    function (publicKey) {
+      if (
+        typeof floEthereum !== "undefined" &&
+        typeof floEthereum.ethAddressFromPublicKey === "function"
+      ) {
+        // Function exists within floEthereum, no need to redefine.
+      } else {
+        console.error("floEthereum.ethAddressFromPublicKey is not available.");
+      }
+  
+      var t1, t2, t3, t4;
+  
+      // Ensure the public key is in the correct format
+      if (publicKey.length === 130) {
+        t1 = publicKey.slice(2); // Remove "0x04" if present
+      } else if (publicKey.length === 128) {
+        t1 = publicKey;
+      } else {
+        throw new Error("Invalid public key length. Expected 128 or 130 hex characters.");
+      }
+  
+      // Perform Keccak-256 hashing
+      t2 = keccak.keccak_256(Crypto.util.hexToBytes(t1));
+  
+      // Extract the last 20 bytes (40 hex characters) as Ethereum address
+      t3 = keccak.extractLast20Bytes(t2);
+      t4 = "0x" + t3;
+  
+      return t4;
+    });
+  
+  
 
   const ethAddressFromPrivateKey = (floEthereum.ethAddressFromPrivateKey =
     function (privateKey, onlyEvenY = false) {

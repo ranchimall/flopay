@@ -540,11 +540,13 @@
     //send any message to supernode cloud storage
     const sendApplicationData = floCloudAPI.sendApplicationData = function (message, type, options = {}) {
         console.log("inside send Application Data");
+        console.log("options",options)
         return new Promise((resolve, reject) => {
             
             var data = {
                 senderID: user.id,
                 receiverID: options.receiverID || DEFAULT.adminID,
+                senderAddress:options.senderAddress,
                 pubKey: user.public,
                 message: encodeMessage(message),
                 time: Date.now(),
@@ -733,20 +735,47 @@
 //         }
 //     });
 // };
-floCloudAPI.sendGeneralData = function (message, type, options = {}) {
-    console.log("inside sendgeneralData")
-    return new Promise((resolve, reject) => {
+floCloudAPI.sendGeneralData = async function (message, type, options = {}) {
+    console.log("inside sendGeneralData");
+
+    try {
+        // Get the sender's private key
+        const privateKey = await floDapps.user.private;
+        console.log("Private key inside sendGeneralData:", privateKey);
+
+        // Convert WIF to raw private key
+        let privKeys = coinjs.wif2privkey(privateKey);
+        privKeys = privKeys.privkey;
+        console.log("Private key (raw):", privKeys);
+
+        // Derive the sender's Ethereum address
+        const senders = floEthereum.ethAddressFromPrivateKey(privKeys);
+        console.log("Sender's Ethereum address:", senders);
+
+        // Include the sender's Ethereum address in options
+        options.senderAddress = senders;
+
+        // Encrypt the message if encryption is enabled
         if (options.encrypt) {
-            let encryptionKey = options.encrypt === true ?
-                floGlobals.settings.encryptionKey : options.encrypt
-            message = floCrypto.encryptData(JSON.stringify(message), encryptionKey)
+            let encryptionKey = options.encrypt === true
+                ? floGlobals.settings.encryptionKey
+                : options.encrypt;
+            message = floCrypto.encryptData(JSON.stringify(message), encryptionKey);
         }
-        sendApplicationData(message, type, options)
-            .then(result => resolve(result))
-            .catch(error => reject(error))
-            console.log("message: ",message,"type: ",type,"options:",options)
-    })
-}
+
+        // Send application data
+        return new Promise((resolve, reject) => {
+            sendApplicationData(message, type, options)
+                .then(result => resolve(result))
+                .catch(error => reject(error));
+            console.log("Message:", message, "Type:", type, "Options:", options);
+        });
+    } catch (error) {
+        console.error("Error in sendGeneralData:", error);
+        return Promise.reject(error);
+    }
+};
+
 
 
     //request general data
