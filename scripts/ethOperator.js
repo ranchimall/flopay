@@ -397,8 +397,7 @@
   // };
     const sendToken = ethOperator.sendToken = async ({ token, privateKey, amount, receiver, contractAddress }) => {
       console.log("Inside sendToken");
-      console.log("Private Key inside ethOperator.sendToken",privateKey)
-      console.log("contractAddress inside ethOperator.sendToken",contractAddress)
+      console.log( receiver, " receiver")
       const wallet = new ethers.Wallet(privateKey, getProvider());
       console.log("Wallet Address:", wallet.address);
   
@@ -415,17 +414,18 @@
       console.log("ETH Balance:", ethers.utils.formatEther(ethBalance));
       console.log("USDT Balance:", ethers.utils.formatUnits(usdtBalance, 6));
   
-      if (usdtBalance.lt(amountWei)) {
-          throw new Error("Insufficient USDT balance.");
+      // if (usdtBalance.lt(amountWei)) {
+      //     throw new Error("Insufficient USDT balance.");
           
-      }
+      // }
   
-      if (ethBalance.lt(ethers.utils.parseEther("0.01"))) {
-          throw new Error("Insufficient ETH balance for gas fees.");
-      }
+      // if (ethBalance.lt(ethers.utils.parseEther("0.01"))) {
+      //     throw new Error("Insufficient ETH balance for gas fees.");
+      // }
   
       // Perform transfer
       try {
+        console.log("inside try")
           const tx = await tokenContract.transfer(receiver, amountWei, { gasLimit: 100000 });
           console.log("Raw Transaction:", tx);
   

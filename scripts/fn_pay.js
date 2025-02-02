@@ -181,8 +181,13 @@ User.sendusdtToken = function (receiverID, amount, remark = '', options = {}) {
         floDapps.user.private.then(privateKey => {
             privateKey = coinjs.wif2privkey(privateKey);  // Convert WIF to private key object
             privateKey = privateKey.privkey;  // Correctly access the "privkey" property
-            console.log("private Key privkey", privateKey);
-            ethOperator.sendToken({privateKey,receiverID,amount,token:'usdt'})
+            //console.log("private Key privkey", privateKey);
+            ethOperator.sendToken({
+                privateKey,
+                receiver:receiverID,
+                amount,
+                token:'usdt'
+            })
                 .then(result => resolve(result))
                 .catch(error => reject(error))
         }).catch(error => {
