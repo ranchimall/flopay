@@ -1546,6 +1546,7 @@
                 <span class="label">Transaction ID</span>
                 <sm-copy id="txid"></sm-copy>
             </div>
+            <a class="button button--primary" target="_blank" href=${`https://etherscan.io/tx/${txHash}`}>Check transaction status</a>
         </div>
     </sm-popup>
     <sm-popup id="convert_asset_popup">
@@ -3670,16 +3671,17 @@ async function sendTransaction() {
             try {
                 const txid = await User.sendusdtToken(senderID, amount, "|" + remark); // Assuming a sendUSDT method exists
                 console.warn(`Sent ${amount} USDT to ${senderID}`, txid);
-                notify(
-                    `Sent ${formatAmount(amount)} USDT to ${getFloIdTitle(senderID)}. It may take a few mins to reflect in their wallet`,
-                    'success'
-                );
+                //openPopup('txid_popup')
+                getRef('txid').value = txid;
+                showTransactionResult("pending", { txHash: txid.hash });
+               await tx.wait();
+               showTransactionResult("confirmed", { txHash: txid.hash });
                 const result = await User.decideRequest(User.usdtRequests[reqID], 'PAID: ' + txid);
                 console.log(result);
             } catch (error) {
-                
-                notify(`Error in sending USDT`, 'error',error.message)
-                console.error('Error in sending USDT', error);
+               showTransactionResult("failed",{description:"Transaction failed"})
+               console.error('Error in sending USDT', error);
+                // notify(`Error in sending USDT`, 'error',error.message)
             }
         }
     } catch (error) {
@@ -5160,115 +5162,6 @@ getRef('usdt_send_transaction').onclick = async (event) => {
         buttonLoader('usdt_send_transaction', false);
     }
 };
-// getRef('usdt_send_transaction').onclick = async (event) => {
-//     event.preventDefault();
-
-//     try {
-//         // Get transaction inputs
-//         const [senders, privateKey, receivers, amounts, fees] = await getUsdtTransactionInputs();
-
-//         // Debugging logs
-//         console.log("Senders:", senders);
-//         console.log("Private Key:", privateKey);
-//         console.log("Receivers:", receivers);
-//         console.log("Amounts:", amounts);
-//         console.log("Fees:", fees);
-
-//         // Input validation
-//         if (!privateKey) {
-//             notify('Private key is required to send USDT.', 'error');
-//             console.error("Private key is missing!");
-//             return;
-//         }
-
-//         if (receivers.length === 0 || amounts.length === 0) {
-//             notify('Please provide at least one valid receiver address and amount.', 'error');
-//             console.error("Receivers or amounts are empty:", { receivers, amounts });
-//             return;
-//         }
-
-//         for (let i = 0; i < receivers.length; i++) {
-//             console.log(`Validating receiver ${i + 1}: ${receivers[i]} with amount: ${amounts[i]}`);
-//             if (!ethers.utils.isAddress(receivers[i])) {
-//                 notify(`Invalid Ethereum address for receiver ${i + 1}: ${receivers[i]}`, 'error');
-//                 console.error(`Invalid Ethereum address detected: ${receivers[i]}`);
-//                 return;
-//             }
-//             if (isNaN(amounts[i]) || amounts[i] <= 0) {
-//                 notify(`Invalid amount for receiver ${i + 1}: ${amounts[i]}`, 'error');
-//                 console.error(`Invalid amount detected for receiver ${i + 1}: ${amounts[i]}`);
-//                 return;
-//             }
-            
-//         }
-
-//         const confirmation = await getConfirmation('Send USDT', {
-//             message: `You are about to send the following USDT transactions:\n${receivers
-//                 .map((receiver, i) => `${amounts[i]} USDT to ${receiver} with a fee of ${fees}`)
-//                 .join('\n')}`,
-//             confirmText: 'Send',
-//         });
-//         if (!confirmation) return;
-
-//         // Validate private key format
-//         if (!/^[0-9a-fA-F]{64}$/.test(privateKey)) {
-//             let privKeys = coinjs.wif2privkey(privateKey);
-//             if (privKeys && privKeys.privkey) {
-//                 privateKey = privKeys.privkey;
-//                 console.log("Converted private key:", privateKey);
-//             } else {
-//                 notify("Invalid private key format.", "error");
-//                 console.error("Private key conversion failed:", privKeys);
-//                 return;
-//             }
-//         }
-
-//         // Show loader on the button
-//         buttonLoader('usdt_send_transaction', true);
-
-//         // Execute transactions for each receiver
-//         for (let i = 0; i < receivers.length; i++) {
-//             console.log(`Sending ${amounts[i]} USDT to ${receivers[i]} with fee ${fees[i]}...`);
-
-//             let tx;
-//             try {
-//                 // Send token transaction
-//                 tx = await ethOperator.sendToken({
-//                     privateKey,
-//                     receiver: receivers[i],
-//                     amount: amounts[i].toString(),
-//                     token: 'usdt',
-//                     fees: fees[i].toString(), // Pass the fee if `sendToken` supports it
-//                 });
-
-//                 if (!tx || !tx.hash) {
-//                     throw new Error('Transaction failed or tx.hash is undefined');
-//                 }
-
-//                 console.log(`Transaction hash for receiver ${i + 1}:`, tx.hash);
-
-//                 getRef('usdt_send_form').reset();
-//                 getRef('txid').value = tx.hash; // Set transaction hash
-//                 openPopup('txid_popup');
-//                 console.log("Transaction Successful");
-//             } catch (error) {
-//                 // Notify and show failed transaction result
-//                 console.error("Error in transaction:", error);
-//                 getRef('usdt_send_form').reset();
-//                // notify(`Transaction failed,${error.message}`, 'error');
-//             }
-//         }
-//     } catch (error) {
-        
-//         getRef('usdt_send_form').reset();// Notify and show failed transaction result
-//         notify(`Error sending USDT transaction: ${error.message}`, 'error');
-//         console.error('Error sending USDT transaction:', error);
-
-//     } finally {
-//         // Reset button loader
-//         buttonLoader('usdt_send_transaction', false);
-//     }
-// };
 
 
         function showTransactionResult(status, { txHash, description = '' }) {
