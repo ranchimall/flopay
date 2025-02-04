@@ -182,6 +182,7 @@ User.sendusdtToken = function (receiverID, amount, remark = '', options = {}) {
             privateKey = coinjs.wif2privkey(privateKey);  // Convert WIF to private key object
             privateKey = privateKey.privkey;  // Correctly access the "privkey" property
             //console.log("private Key privkey", privateKey);
+           // shwoTransactionResult("pending",)
             ethOperator.sendToken({
                 privateKey,
                 receiver:receiverID,
