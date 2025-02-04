@@ -3674,7 +3674,7 @@ async function sendTransaction() {
                 //openPopup('txid_popup')
                 getRef('txid').value = txid;
                 showTransactionResult("pending", { txHash: txid.hash });
-               await tx.wait();
+               await txid.wait();
                showTransactionResult("confirmed", { txHash: txid.hash });
                 const result = await User.decideRequest(User.usdtRequests[reqID], 'PAID: ' + txid);
                 console.log(result);
