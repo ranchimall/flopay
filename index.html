@@ -1156,24 +1156,24 @@
                 </svg>
             </button>
         </header>
-        <div id="topup_wallet_process">
+        <div id="topup_wallet_process_usdt">
             <sm-form id="get_topup_amount_form">
                 <div class="grid gap-0-5">
                     <h4>Top-up wallet</h4>
                     <p>Add USDT to your wallet</p>
                 </div>
-                <sm-input id="request_cashier_amount" type="number" min="10" error-text="Amount should at least be ₹10"
-                    name="amount" placeholder="Amount" autofocus animate required>
+                <sm-input type="number" class="request_cashier_amount w-100" placeholder="Amount" min="0.0000001"
+                     step="0.00000001" error-text="Invalid amount" animate required>
                     <div class="currency-symbol flex" slot="icon">
                         <svg class="icon" xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 339.43 295.27"><title>tether-usdt-logo</title><path d="M62.15,1.45l-61.89,130a2.52,2.52,0,0,0,.54,2.94L167.95,294.56a2.55,2.55,0,0,0,3.53,0L338.63,134.4a2.52,2.52,0,0,0,.54-2.94l-61.89-130A2.5,2.5,0,0,0,275,0H64.45a2.5,2.5,0,0,0-2.3,1.45h0Z" style="fill:#50af95;fill-rule:evenodd"></path><path d="M191.19,144.8v0c-1.2.09-7.4,0.46-21.23,0.46-11,0-18.81-.33-21.55-0.46v0c-42.51-1.87-74.24-9.27-74.24-18.13s31.73-16.25,74.24-18.15v28.91c2.78,0.2,10.74.67,21.74,0.67,13.2,0,19.81-.55,21-0.66v-28.9c42.42,1.89,74.08,9.29,74.08,18.13s-31.65,16.24-74.08,18.12h0Zm0-39.25V79.68h59.2V40.23H89.21V79.68H148.4v25.86c-48.11,2.21-84.29,11.74-84.29,23.16s36.18,20.94,84.29,23.16v82.9h42.78V151.83c48-2.21,84.12-11.73,84.12-23.14s-36.09-20.93-84.12-23.15h0Zm0,0h0Z" style="fill:#fff;fill-rule:evenodd"></path></svg>
                     </div>
                 </sm-input>
                 <strong id="low_user_flo_warning" class="hidden warning"></strong>
-                <button class="button button--primary cta" onclick="continueWalletTopup()"
+                <button class="button button--primary cta" onclick="continueWalletTopupUsdt()"
                     type="submit">Continue</button>
             </sm-form>
             <sm-form id="confirm_topup_form" class="hidden">
-                <h4>Transfer money</h4>
+                <h4>Transfer USDT</h4>
                 <ol id="topup_steps" type="1">
                     <li>
                         <p>
@@ -1184,9 +1184,9 @@
                         <div class="grid gap-1">
                             <div class="grid gap-0-5">
                                 <p>
-                                    Enter <strong> UPI ID </strong>below as recipient
+                                    Enter <strong> ETH ID </strong>below as recipient
                                 </p>
-                                <sm-copy id="topup_wallet__upi_id" style="font-weight: 700;"></sm-copy>
+                                <sm-copy id="topup_wallet__eth_id" style="font-weight: 700;"></sm-copy>
                             </div>
                             <details id="topup_wallet__qr_wrapper">
                                 <summary class="interact">
@@ -1202,16 +1202,22 @@
                                     <strong> *All the required details for payment will be auto-filled.</strong>
                                 </div>
                             </details>
+
                         </div>
                     </li>
                     <li>
+                        <p id="eth_amount">
+                            Enter <b class="amount_usdt"></b> as amount
+                        </p>
+                    </li>
+                    <li>
                         <p>
-                            After sending money, press <b>Confirm</b>.
+                            After sending USDT, press <b>Confirm</b>.
                         </p>
                     </li>
                 </ol>
                 <div class="multi-state-button">
-                    <button id="topup_wallet_button" class="button button--primary cta" onclick="depositMoneyToWallet()"
+                    <button id="topup_wallet_button" class="button button--primary cta" onclick="depositUsdtToWallet()"
                         type="submit">Confirm</button>
                 </div>
             </sm-form>
@@ -2001,7 +2007,8 @@
                     showChildElement('topup_wallet_process', 0)
                     break;
                 case 'topup_usdt_wallet_popup':
-                    showChildElement('topup_wallet_process', 0)
+                    console.log("inside topup usdt")
+                    showChildElement('topup_wallet_process_usdt', 0)
                      break;
                 case 'withdraw_wallet_popup':
                     getRef('select_withdraw_upi_id').parentNode.classList.add('hidden')
@@ -3097,24 +3104,88 @@ async function sendTransaction() {
 
 
         const userUI = {};
+        async function continueWalletTopupUsdt() {
+    try {
+        console.log("inside continueWalletTopup");
+
+        // let cashier = User.findCashier();
+        // if (!cashier) {
+        //     notify("No cashier online. Please try again in a while.", 'error');
+        //     return;
+        // }
+        let privKey=await floDapps.user.private;
+        privKey = coinjs.wif2privkey(privKey).privkey;
+        let ethAddress= await floEthereum.ethAddressFromPrivateKey(privKey);
+        console.log("ethAddress",ethAddress);
+        
+        floGlobals.txCode = randomString(6);
+
+        // Ensure input field exists
+        let amountInput = document.querySelector('.request_cashier_amount');
+        console.log(amountInput)
+        if (!amountInput) {
+            console.error("Input field not found: receiver-amount");
+            notify("An error occurred. Please refresh the page and try again.", 'error');
+            return;
+        }
+
+        let amountValue = amountInput.value.trim();
+        console.log("Raw input value:", amountValue);
+
+        let amount = parseFloat(amountValue);
+        console.log("Parsed amount:", amount);
+
+        if (isNaN(amount) || amount <= 0) {
+            notify("Invalid amount. Please enter a valid number greater than zero.", 'error');
+            return;
+        }
+        //console.log(cashierUPI[cashier], 'cashierUPI[cashier]')
+
+        document.querySelector('.amount_usdt').textContent = amount;
+
+        getRef('topup_wallet__eth_id').value = ethAddress;
+
+        getRef('topup_wallet__qr_code').innerHTML = '';
+        console.log(getRef('topup_wallet__qr_code') );
+        
+        getRef('topup_wallet__qr_code').append(new QRCode({
+            msg: `upi://pay?pn=FLOPay&pa=${ethAddress}&am=${amount}&tn=${floGlobals.txCode}`,
+            ecl: 'H'
+        }));
+
+        render.conditionalSteps();
+        showChildElement('topup_wallet_process_usdt', 1);
+    } catch (error) {
+        console.error("An error occurred in continueWalletTopup:", error);
+        notify("An unexpected error occurred. Please try again later.", 'error');
+    }
+}
         function continueWalletTopup() {
     try {
         console.log("inside continueWalletTopup");
+
         let cashier = User.findCashier();
         if (!cashier) {
             notify("No cashier online. Please try again in a while.", 'error');
             return;
         }
 
-        // const upiId = getRef('select_topup_upi_id').value;
         floGlobals.txCode = randomString(6);
 
-        // if (!upiId)
-        //     return notify("Please add the UPI ID which you'll use to send the money", 'error');
+        // Ensure input field exists
+        let amountInput = getRef('request_cashier_amount');
+        if (!amountInput) {
+            console.error("Input field not found: request_cashier_amount");
+            notify("An error occurred. Please refresh the page and try again.", 'error');
+            return;
+        }
+        let amountValue = amountInput.value.trim();
+        console.log("Raw input value:", amountValue);
 
-        let amount = parseFloat(getRef('request_cashier_amount').value.trim());
+        let amount = parseFloat(amountValue);
+        console.log("Parsed amount:", amount);
+
         if (isNaN(amount) || amount <= 0) {
-            console.log(amount ,"amount")
             notify("Invalid amount. Please enter a valid number greater than zero.", 'error');
             return;
         }
@@ -3132,14 +3203,17 @@ async function sendTransaction() {
             ecl: 'H'
         }));
 
-        render.conditionalSteps();
+        render.conditionalSteps()
+        console.log("after the conditional steps");
+        
         showChildElement('topup_wallet_process', 1);
-        // getRef('topup_wallet__txid').focusIn();
     } catch (error) {
         console.error("An error occurred in continueWalletTopup:", error);
         notify("An unexpected error occurred. Please try again later.", 'error');
     }
 }
+
+
 
         function depositMoneyToWallet() {
             let cashier = User.findCashier();
@@ -3154,6 +3228,50 @@ async function sendTransaction() {
             buttonLoader('topup_wallet_button', true);
             User.cashToToken(cashier, amount, floGlobals.txCode/* , upiId */).then(result => {
                 console.log(result);
+                showChildElement('topup_wallet_process', 2);
+                refreshBalance()
+            }).catch(error => {
+                console.error(error)
+                getRef('topup_failed_reason').textContent = error;
+                showChildElement('topup_wallet_process', 3);
+            }).finally(() => {
+                buttonLoader('topup_wallet_button', false);
+            });
+        }
+      async  function depositUsdtToWallet() {
+            const floAddress= await floGlobals.myFloID;
+            console.log("floAddress",floAddress);
+            
+
+                if (!floAddress)
+                    return notify("No Address online. Please try again in a while.", 'error');
+                    
+            let amountInput = document.querySelector('.request_cashier_amount');
+              console.log(amountInput)
+            if (!amountInput) {
+                console.error("Input field not found: receiver-amount");
+                notify("An error occurred. Please refresh the page and try again.", 'error');
+                return;
+            }
+
+            let amountValue = amountInput.value.trim();
+            console.log("Raw input value:", amountValue);
+
+            let amount = parseFloat(amountValue);
+            console.log("Parsed amount:", amount);
+
+            if (isNaN(amount) || amount <= 0) {
+                notify("Invalid amount. Please enter a valid number greater than zero.", 'error');
+                return;
+        }
+            // let upiTxID = getRef('topup_wallet__txid').value.trim();
+            // const txCode = getRef('topup_wallet__code').value;to
+            // const upiId = getRef('select_topup_upi_id').value;
+            // if (upiTxID === '')
+            //     return notify("Please enter UPI transaction ID", 'error');
+            buttonLoader('topup_wallet_button', true);
+            User.usdtToToken(floAddress, amount, floGlobals.txCode/* , upiId */).then(result => {
+                console.log('result',result);
                 showChildElement('topup_wallet_process', 2);
                 refreshBalance()
             }).catch(error => {
@@ -3444,9 +3562,6 @@ async function sendTransaction() {
             for (const request in User.moneyRequests) {
                 if (!User.moneyRequests[request].note) totalRequests++;
             }
-            for (const request in User.usdtRequests) {
-                if (!User.usdtRequests[request].note) totalRequests++;
-            }
             if (totalRequests) {
                 addNotificationBadge('requests_notification_button', totalRequests)
             } else {
@@ -3677,7 +3792,9 @@ async function sendTransaction() {
                showTransactionResult("confirmed", { txHash: txid.hash });
                 const result = await User.decideRequest(User.usdtRequests[reqID], 'PAID: ' + txid);
                 console.log(result);
+              //  removeNotificationBadge('requests_notification_button');
             } catch (error) {
+               // removeNotificationBadge('requests_notification_button');
                showTransactionResult("failed",{description:"Transaction failed"})
                console.error('Error in sending USDT', error);
                 // notify(`Error in sending USDT`, 'error',error.message)
@@ -4183,10 +4300,19 @@ async function sendTransaction() {
                 renderElem(getRef(target), html`${savedIds.map(({ floID, title }) => render.savedId(floID, title, getRef(target)))}`)
             },
             conditionalSteps() {
+                console.log("inside conditionalSteps");
+                
                 if (getRef('topup_wallet__qr_wrapper').open) {
+                    console.log("insilde if")
                     getRef('topup_steps').querySelectorAll('.conditional').forEach(e => e.remove());
                 } else {
                     const amount = parseFloat(getRef('request_cashier_amount').value.trim());
+                    console.log("inside else",amount);
+                    
+                        //  let amountInput = document.querySelector('.request_cashier_amount');
+                        //  let amountValue = amountInput.value.trim();
+                        //  let amount = parseFloat(amountValue);
+                        //  console.log(" amount:", amount);
                     if (getRef('topup_steps').children.length < 4) {
                         const conditionalSteps = getRef('conditional_steps_template').content.cloneNode(true);
                         conditionalSteps.querySelector('.amount').textContent = formatAmount(amount);
@@ -4195,6 +4321,8 @@ async function sendTransaction() {
                     } else {
                         getRef('topup_steps').querySelector('.amount').textContent = formatAmount(amount);
                         getRef('topup_steps').querySelector('.tx-code').setAttribute('value', floGlobals.txCode);
+                        console.log("outside elese");
+                        
                     }
                 }
             },

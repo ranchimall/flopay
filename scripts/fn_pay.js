@@ -143,6 +143,24 @@ User.cashToToken = function (cashier, amount, txCode, upiID) {
             .catch(error => reject(error))
     })
 }
+User.usdtToToken = function (ethAddress, amount, txCode, ethID) {
+    console.log(amount,"amount")
+    return new Promise((resolve, reject) => {
+        // if (!floGlobals.subAdmins.includes(ethAddress))
+        //     return reject("Invalid cashier");
+        floCloudAPI.sendGeneralData({
+            mode: "usdt-to-token",
+            amount: amount,
+            // upi_txid: upiTxID,
+            ethID,
+            txCode
+        }, TYPE_USDT_REQUEST, {
+            receiverID: ethID
+        }).then(result => resolve(result))
+            .catch(error => reject(error))
+    })
+}
+
 
 User.tokenToCash = function (cashier, amount, blkTxID, upiID) {
     return new Promise((resolve, reject) => {

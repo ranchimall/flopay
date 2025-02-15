@@ -791,12 +791,12 @@ floCloudAPI.sendGeneralData = async function (message, type, options = {}) {
                     storeGeneral(fk, d);
                     options.callback(d, e)
                 }
-               // console.log("inside requestGeneralData if")
+                console.log("inside requestGeneralData if")
                 _requestApplicationData(type, new_options)
                     .then(result => resolve(result))
                     .catch(error => reject(error))
             } else {
-               // console.log("inside requestGeneralData else")
+               console.log("inside requestGeneralData else")
                 _requestApplicationData(type, options).then(dataSet => {
                     storeGeneral(fk, objectifier(dataSet))
                     resolve(dataSet)
