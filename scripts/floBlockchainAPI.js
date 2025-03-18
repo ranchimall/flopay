@@ -136,6 +136,7 @@
             if (!isUndefined(query_params))
                 apicall += '?' + new URLSearchParams(JSON.parse(JSON.stringify(query_params))).toString();
             //console.debug(apicall);
+            //console.log(apicall)
             fetch_api(apicall)
                 .then(result => resolve(result))
                 .catch(error => reject(error));

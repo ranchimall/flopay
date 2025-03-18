@@ -176,11 +176,19 @@ sm-popup::part(backdrop) {
   -webkit-backdrop-filter: blur(0.5rem);
           backdrop-filter: blur(0.5rem);
 }
-
-sm-input,
+.input-group {
+  display: flex;
+  gap: 5px;
+  width: 100%;
+}
+sm-input{
+ flex:1;
+ width: 50%;
+}
 sm-textarea {
   --border-radius: 0.5rem;
   --background-color: rgba(var(--foreground-color), 1);
+  --width:24rem;
 }
 sm-input button .icon,
 sm-textarea button .icon {
@@ -617,6 +625,9 @@ ol li::before {
   padding: 0 1.5rem 0 0.5rem;
   align-items: center;
   grid-template-columns: auto 1fr;
+  flex-wrap: nowrap;
+  display: flex;
+  justify-content: space
 }
 .popup__header > * {
   grid-row: 1;

@@ -1,7 +1,8 @@
 /*jshint esversion: 6 */
 const TYPE_MONEY_REQUEST = "MoneyRequests",
     TYPE_CASHIER_REQUEST = "CashierRequests",
-    TYPE_CASHIER_UPI = "CashierUPI";
+    TYPE_CASHIER_UPI = "CashierUPI",
+    TYPE_USDT_REQUEST= "UsdtRequests"
 
 const cashierUPI = {};
 const cashierPubKeys = {};
@@ -21,10 +22,17 @@ User.init = function () {
             callback: userUI.renderCashierRequests //UI_fn
         }));
         //Request received from other Users for token
-        promises.push(floCloudAPI.requestGeneralData(TYPE_MONEY_REQUEST, {
+        promises.push(floCloudAPI.requestGeneralData(
+            TYPE_MONEY_REQUEST, {
             receiverID: myFloID,
             callback: userUI.renderMoneyRequests //UI_fn
         }));
+
+        promises.push(floCloudAPI.requestGeneralData(TYPE_USDT_REQUEST, {
+            //console.log("inside request general data")
+            receiverID: myFloID,
+            callback: userUI.renderUsdtRequests
+        }))
         //Check online status of cashiers
         promises.push(floCloudAPI.requestStatus(Array.from(floGlobals.subAdmins), {
             callback: (d, e) => {
@@ -85,7 +93,18 @@ Object.defineProperty(User, 'cashierRequests', {
 
 Object.defineProperty(User, 'moneyRequests', {
     get: function () {
+        //console.log("inside tpay money requests");
+        
         let fk = floCloudAPI.util.filterKey(TYPE_MONEY_REQUEST, {
+            receiverID: myFloID,
+        });
+        //console.log("floGlobals.generalData[fk]", floGlobals.generalData[fk]);
+        return floGlobals.generalData[fk];
+    }
+});
+Object.defineProperty(User, 'usdtRequests', {
+    get: function () {
+        let fk = floCloudAPI.util.filterKey(TYPE_USDT_REQUEST, {
             receiverID: myFloID,
         });
         return floGlobals.generalData[fk];
@@ -124,6 +143,24 @@ User.cashToToken = function (cashier, amount, txCode, upiID) {
             .catch(error => reject(error))
     })
 }
+User.usdtToToken = function (ethAddress, amount, txCode, ethID) {
+    console.log(amount,"amount")
+    return new Promise((resolve, reject) => {
+        // if (!floGlobals.subAdmins.includes(ethAddress))
+        //     return reject("Invalid cashier");
+        floCloudAPI.sendGeneralData({
+            mode: "usdt-to-token",
+            amount: amount,
+            // upi_txid: upiTxID,
+            ethID,
+            txCode
+        }, TYPE_USDT_REQUEST, {
+            receiverID: ethID
+        }).then(result => resolve(result))
+            .catch(error => reject(error))
+    })
+}
+
 
 User.tokenToCash = function (cashier, amount, blkTxID, upiID) {
     return new Promise((resolve, reject) => {
@@ -140,7 +177,6 @@ User.tokenToCash = function (cashier, amount, blkTxID, upiID) {
             .catch(error => reject(error))
     })
 }
-
 User.sendToken = function (receiverID, amount, remark = '', options = {}) {
     return new Promise((resolve, reject) => {
         floDapps.user.private.then(privateKey => {
@@ -155,7 +191,34 @@ User.sendToken = function (receiverID, amount, remark = '', options = {}) {
     })
 }
 
+
+User.sendusdtToken = function (receiverID, amount, remark = '', options = {}) {
+    console.log("inside sendusdtToken")
+    console.log('receiverID',receiverID, amount,'amount', remark,'remark',options,'options' )
+    return new Promise((resolve, reject) => {
+        floDapps.user.private.then(privateKey => {
+            privateKey = coinjs.wif2privkey(privateKey);  // Convert WIF to private key object
+            privateKey = privateKey.privkey;  // Correctly access the "privkey" property
+            //console.log("private Key privkey", privateKey);
+           // shwoTransactionResult("pending",)
+            ethOperator.sendToken({
+                privateKey,
+                receiver:receiverID,
+                amount,
+                token:'usdt'
+            })
+                .then(result => resolve(result))
+                .catch(error => reject(error))
+        }).catch(error => {
+            console.log(error);
+            notify('Invalid password', 'error');
+            reject(error);
+        })
+    })
+}
+
 User.requestToken = function (floID, amount, remark = '') {
+    console.log("inside request token");
     return new Promise((resolve, reject) => {
         floCloudAPI.sendGeneralData({
             amount: amount,
@@ -166,6 +229,45 @@ User.requestToken = function (floID, amount, remark = '') {
             .catch(error => reject(error))
     })
 }
+
+User.requestUsdt = function (receiver, amount, remark = '') {
+    console.log("inside requestUsdt ")
+    console.log(receiver, amount, remark);
+    return new Promise((resolve, reject) => {
+        floCloudAPI.sendGeneralData( { // Corrected the argument order
+            amount: amount,
+            remark: remark,
+        }, TYPE_USDT_REQUEST, {  
+            receiverID: receiver
+        }).then(result => resolve(result)).catch(error => reject(error));
+    });
+};
+
+// userUI.requestUsdtFromUser = function (receiver, amount, remark) {
+   
+//     getConfirmation('Confirm', {
+//         message: `Do you want to request ${amount} USDT from ${receiver}?`,
+//         confirmText: 'Request',
+//     }).then(confirmation => {
+//         if (confirmation) {
+//             buttonLoader('token_transfer__button', true); // Show loader on the button
+
+//             User.requestUsdt(receiver, amount, remark).then(result => {
+//                     console.log("inside request usdt token")
+//                     console.log(`Requested ${amount} USDT from ${receiver}`, result);
+//                     notify(`Requested ${amount} USDT from ${receiver}`, 'success');
+//                     closePopup(); // Close the request popup
+//                 })
+//                 .catch(error => {
+//                     console.error('Error requesting USDT:', error);
+//                     notify(error.message || 'Failed to request USDT. Please try again.', 'error');
+//                 })
+//                 .finally(() => {
+//                     buttonLoader('token_transfer__button', false); // Remove loader from the button
+//                 });
+//         }
+//     });
+// };
 
 User.decideRequest = function (request, note) {
     return new Promise((resolve, reject) => {
